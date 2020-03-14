@@ -19,6 +19,7 @@ python = ">=3.6,<3.8"
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.1"
 pytest-cov = "^2.8.1"
+pytest-qt = "^3.3.0"
 pre-commit = "^2.1.1"
 black = "^19.10b0"
 isort = "^4.3.21"
@@ -34,7 +35,7 @@ sphinx-autodoc-typehints = "^1.10.3"
 
 [tool.taskipy.tasks]
 link = "pre-commit run --all"
-tests = "ytest --cov=dial_basic_nodes/ --cov-report term-missing:skip-covered"
+tests = "pytest --cov=dial_basic_nodes/ --cov-report term-missing:skip-covered"
 doc-coverage = "docstr-coverage -fi dial_basic_nodes"
 docs = "cd docs; make html"
 
