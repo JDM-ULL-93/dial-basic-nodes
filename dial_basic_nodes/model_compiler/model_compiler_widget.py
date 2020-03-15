@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from PySide2.QtWidgets import QGridLayout, QWidget
 
-from dial.utils import log
+from dial_core.utils import log
 
 if TYPE_CHECKING:
     from .parameters_form import ParametersForm

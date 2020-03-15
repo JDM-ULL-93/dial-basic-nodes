@@ -6,12 +6,7 @@ From editing datasets to compiling models, this nodes should satisfy most of the
 when working with classical Deep Learning problems.
 """
 
-from dial.node_editor import NodeFactorySingleton
+from .test_node import TestNode
 
-from .dataset_editor import DatasetEditorNodeFactory
-from .layers_editor import LayersEditorNodeFactory
-from .model_compiler import ModelCompilerNodeFactory
 
-NodeFactorySingleton().register_node_factory("Dataset Editor", DatasetEditorNodeFactory)
-NodeFactorySingleton().register_node_factory("Layers Editor", LayersEditorNodeFactory)
-NodeFactorySingleton().register_node_factory("Model Compiler", ModelCompilerNodeFactory)
+__all__ = ["TestNode"]

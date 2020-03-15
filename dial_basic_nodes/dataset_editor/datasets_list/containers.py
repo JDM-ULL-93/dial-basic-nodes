@@ -7,7 +7,7 @@ Dependency Injection containers.
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
-from dial.base.datasets import PredefinedDatasetLoaders
+from dial_core.base.datasets import PredefinedDatasetLoaders
 
 from . import dialog, model, view
 

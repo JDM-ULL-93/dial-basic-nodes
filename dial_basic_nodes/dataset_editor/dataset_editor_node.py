@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from dial.base.datasets import Dataset
-from dial.node_editor import Node, OutputPort
+from dial_core.datasets import Dataset
+from dial_core.node_editor import Node, OutputPort
 
 if TYPE_CHECKING:
     from .dataset_editor_widget import DatasetEditorWidget
@@ -25,5 +25,5 @@ class DatasetEditorNode(Node):
     def get_train_dataset(self):  # TODO: Implement
         raise NotImplementedError("get_train_dataset not implemented!")
 
-    def get_test_dataset(self):  # TODO: Implementget_model_layers
+    def get_test_dataset(self):  # TODO: Implement get_model_layers
         raise NotImplementedError("get_test_dataset not implemented!")

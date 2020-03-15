@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from PySide2.QtCore import QAbstractListModel, QModelIndex, Qt
 
-from dial.utils import log
+from dial_core.utils import log
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
 
-    # from dial.base.datasets import DatasetLoader
+    # from dial_core.base.datasets import DatasetLoader
 
 
 LOGGER = log.get_logger(__name__)

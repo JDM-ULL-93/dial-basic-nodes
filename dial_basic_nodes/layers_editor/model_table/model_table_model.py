@@ -13,7 +13,7 @@ from PySide2.QtCore import (
     Qt,
 )
 
-from dial.utils import Dial, log
+from dial_core.utils import Dial, log
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
@@ -28,7 +28,7 @@ class ModelTableModel(QAbstractTableModel):
     Model used for composing the layers that form a Neural Network Model.
 
     Layer attributes (units, activations...) can be modified from this model. It also
-    allows adding layers through a drop event (layers must have "Dial.KerasLayerMIME"
+    allows adding layers through a drop event (layers must have "dial_core.KerasLayerMIME"
     MIME type)
     """
 
@@ -195,7 +195,7 @@ class ModelTableModel(QAbstractTableModel):
         MIME Types supported by this model. In this case, the only supported MIME type
         is the one representing a list of Keras Layer.
         """
-        return [Dial.KerasLayerListMIME.value]
+        return [dial_core.KerasLayerListMIME.value]
 
     def mimeData(self, indexes: List["QModelIndex"]) -> "QMimeData":
         """
@@ -215,7 +215,7 @@ class ModelTableModel(QAbstractTableModel):
                 stream.writeQVariant(layer)
 
         # Store the serialized data on the MIME data
-        mime_data.setData(Dial.KerasLayerListMIME.value, encoded_data)
+        mime_data.setData(dial_core.KerasLayerListMIME.value, encoded_data)
 
         return mime_data
 
@@ -233,7 +233,7 @@ class ModelTableModel(QAbstractTableModel):
         if action == Qt.IgnoreAction:
             return True
 
-        if not mime_data.hasFormat(Dial.KerasLayerListMIME.value):
+        if not mime_data.hasFormat(dial_core.KerasLayerListMIME.value):
             return False
 
         # Get the row number where the layers will be inserted
@@ -246,7 +246,7 @@ class ModelTableModel(QAbstractTableModel):
         LOGGER.debug("Adding a new row at index %s...", begin_row)
 
         # Get the serilalized data from the MIME data and prepare for decoding
-        encoded_data: QByteArray = mime_data.data(Dial.KerasLayerListMIME.value)
+        encoded_data: QByteArray = mime_data.data(dial_core.KerasLayerListMIME.value)
         stream = QDataStream(encoded_data, QIODevice.ReadOnly)
 
         # Unserialize binary data

@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, List, Optional
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt
 from PySide2.QtGui import QPixmapCache
 
-from dial.utils import Dial, log
+from dial_core.utils import Dial, log
 
 if TYPE_CHECKING:
-    from dial.base.datasets import Dataset
+    from dial_core.base.datasets import Dataset
     from PySide2.QtWidgets import QObject
 
 
@@ -38,7 +38,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.__role_map = {
             Qt.DisplayRole: self.__display_role,
-            Dial.TypeRole.value: self.__data_type_role,
+            dial_core.TypeRole.value: self.__data_type_role,
         }
 
     def load_dataset(self, dataset: "Dataset"):

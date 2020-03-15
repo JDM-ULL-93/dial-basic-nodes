@@ -8,8 +8,8 @@ from PySide2.QtCore import QRect, QSize, Qt
 from PySide2.QtGui import QPixmap, QPixmapCache
 from PySide2.QtWidgets import QStyledItemDelegate
 
-from dial.base.datasets import datatype
-from dial.utils import Dial
+from dial_core.base.datasets import datatype
+from dial_core.utils import Dial
 
 if TYPE_CHECKING:
     from PySide2.QtCore import QModelIndex
@@ -35,7 +35,7 @@ class DatasetItemDelegate(QStyledItemDelegate):
         Paint the element according to its type.
         """
         # Get the data type (Image, Numeric...)
-        data_type = index.data(Dial.TypeRole.value)
+        data_type = index.data(dial_core.TypeRole.value)
 
         # Draw image
         if isinstance(data_type, datatype.ImageArray):
@@ -92,7 +92,7 @@ class DatasetItemDelegate(QStyledItemDelegate):
         alignment = Qt.AlignCenter
 
         # Get the datatype
-        data_type = index.data(Dial.TypeRole.value)
+        data_type = index.data(dial_core.TypeRole.value)
 
         # Align arrays to left
         if isinstance(data_type, datatype.NumericArray):
