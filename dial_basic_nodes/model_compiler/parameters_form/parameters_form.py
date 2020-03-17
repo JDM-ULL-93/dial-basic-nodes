@@ -1,5 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import dependency_injector.providers as providers
 from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QComboBox, QFormLayout, QPushButton, QSpinBox, QWidget
 
@@ -72,3 +73,6 @@ class ParametersForm(QWidget):
         self.__main_layout.addWidget(self.__compile_button)
 
         self.setLayout(self.__main_layout)
+
+
+ParametersFormFactory = providers.Factory(ParametersForm)

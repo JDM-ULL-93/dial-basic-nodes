@@ -2,8 +2,12 @@
 
 from typing import TYPE_CHECKING
 
+import dependency_injector.providers as providers
+
 from dial_core.datasets import Dataset
 from dial_core.node_editor import Node, OutputPort
+
+from .dataset_editor_widget import DatasetEditorWidgetFactory
 
 if TYPE_CHECKING:
     from .dataset_editor_widget import DatasetEditorWidget
@@ -27,3 +31,8 @@ class DatasetEditorNode(Node):
 
     def get_test_dataset(self):  # TODO: Implement get_model_layers
         raise NotImplementedError("get_test_dataset not implemented!")
+
+
+DatasetEditorNodeFactory = providers.Factory(
+    DatasetEditorNode, dataset_editor_widget=DatasetEditorWidgetFactory
+)

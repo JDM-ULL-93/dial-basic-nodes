@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING
 
+import dependency_injector.providers as providers
 from PySide2.QtCore import QSize
 from PySide2.QtWidgets import (
     QFormLayout,
@@ -12,10 +13,8 @@ from PySide2.QtWidgets import (
     QWidget,
 )
 
+from .dataset_table import TrainTestTabs, TrainTestTabsFactory
 from .datasets_list import PredefinedDatasetsList
-
-if TYPE_CHECKING:
-    from .dataset_table import TrainTestTabs
 
 
 class DatasetEditorWidget(QWidget):
@@ -87,3 +86,8 @@ class DatasetEditorWidget(QWidget):
             self.__dataset_name_label.setText(dataset_loader.name)
             self.__train_len_label.setText(str(len(train)))
             self.__test_len_label.setText(str(len(test)))
+
+
+DatasetEditorWidgetFactory = providers.Factory(
+    DatasetEditorWidget, train_test_tabs=TrainTestTabsFactory
+)

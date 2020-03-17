@@ -1,13 +1,16 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+
 from typing import TYPE_CHECKING
 
+import dependency_injector.providers as providers
 from PySide2.QtWidgets import QTabWidget
 
+from .containers import DatasetTableMVFactory
+
 if TYPE_CHECKING:
-    from dial_core.base.datasets import Dataset
+    from dial_core.datasets import Dataset
     from PySide2.QtWidgets import QWidget
-    from .containers import DatasetTableMVFactory
 
 
 class TrainTestTabs(QTabWidget):
@@ -44,3 +47,8 @@ class TrainTestTabs(QTabWidget):
     def __setup_ui(self):
         self.addTab(self.__train_view, "Train")
         self.addTab(self.__test_view, "Test")
+
+
+TrainTestTabsFactory = providers.Factory(
+    TrainTestTabs, datasettable_mv_factory=DatasetTableMVFactory
+)

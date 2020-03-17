@@ -1,8 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from .container import ModelCompilerNodeFactory, ModelCompilerWidgetFactory
-from .model_compiler_node import ModelCompilerNode
-from .model_compiler_widget import ModelCompilerWidget
+from .model_compiler_node import ModelCompilerNode, ModelCompilerNodeFactory
+from .model_compiler_widget import ModelCompilerWidget, ModelCompilerWidgetFactory
 
 __all__ = [
     "ModelCompilerNode",

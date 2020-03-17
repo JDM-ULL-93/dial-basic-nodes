@@ -8,7 +8,7 @@ from PySide2.QtGui import QPixmapCache
 from dial_core.utils import Dial, log
 
 if TYPE_CHECKING:
-    from dial_core.base.datasets import Dataset
+    from dial_core.datasets import Dataset
     from PySide2.QtWidgets import QObject
 
 
@@ -38,7 +38,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.__role_map = {
             Qt.DisplayRole: self.__display_role,
-            dial_core.TypeRole.value: self.__data_type_role,
+            19: self.__data_type_role,
         }
 
     def load_dataset(self, dataset: "Dataset"):
@@ -164,7 +164,6 @@ class DatasetTableModel(QAbstractTableModel):
         LOGGER.debug("Previous model size: %s", self.rowCount())
         self.beginRemoveRows(QModelIndex(), row, row + count - 1)
 
-
         del self.__x[row : row + count]
         del self.__y[row : row + count]
         self.__dataset.delete_rows(row, count)
@@ -176,7 +175,6 @@ class DatasetTableModel(QAbstractTableModel):
         LOGGER.debug("New model size: %s", self.rowCount())
 
         return True
-
 
     def __display_role(self, row: int, column: int):
         """

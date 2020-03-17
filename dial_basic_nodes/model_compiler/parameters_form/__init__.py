@@ -1,6 +1,5 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from .containers import ParametersFormFactory
-from .parameters_form import ParametersForm
+from .parameters_form import ParametersForm, ParametersFormFactory
 
 __all__ = ["ParametersFormFactory", "ParametersForm"]

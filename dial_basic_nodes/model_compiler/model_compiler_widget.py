@@ -1,10 +1,14 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+
 from typing import TYPE_CHECKING
 
+import dependency_injector.providers as providers
 from PySide2.QtWidgets import QGridLayout, QWidget
 
 from dial_core.utils import log
+
+from .parameters_form import ParametersFormFactory
 
 if TYPE_CHECKING:
     from .parameters_form import ParametersForm
@@ -28,3 +32,8 @@ class ModelCompilerWidget(QWidget):
         self.__main_layout.addWidget(self.__parameters_form)
 
         self.setLayout(self.__main_layout)
+
+
+ModelCompilerWidgetFactory = providers.Factory(
+    ModelCompilerWidget, parameters_form=ParametersFormFactory
+)

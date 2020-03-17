@@ -9,8 +9,6 @@ from dial_core.utils import log
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
 
-    # from dial_core.base.datasets import DatasetLoader
-
 
 LOGGER = log.get_logger(__name__)
 

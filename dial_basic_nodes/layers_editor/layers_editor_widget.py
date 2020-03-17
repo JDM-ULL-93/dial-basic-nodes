@@ -2,8 +2,12 @@
 
 from typing import TYPE_CHECKING
 
+import dependency_injector.providers as providers
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtWidgets import QDockWidget, QMainWindow
+
+from .layers_tree import LayersTreeFactory
+from .model_table import ModelTableFactory
 
 if TYPE_CHECKING:
     from .layers_tree import LayersTreeWidget
@@ -49,3 +53,8 @@ class LayersEditorWidget(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.__dock_layers_tree)
 
         self.setCentralWidget(self.__model_table)
+
+
+LayersEditorWidgetFactory = providers.Factory(
+    LayersEditorWidget, layers_tree=LayersTreeFactory, model_table=ModelTableFactory
+)
