@@ -6,7 +6,7 @@ import dependency_injector.providers as providers
 from tensorflow.keras import Model
 
 from dial_core.datasets import Dataset
-from dial_core.node_editor import InputPort, Node, OutputPort
+from dial_core.node_editor import Node
 from dial_core.utils import Dial
 
 from .model_compiler_widget import ModelCompilerWidgetFactory
@@ -22,10 +22,10 @@ class ModelCompilerNode(Node):
         )
 
         # Ports
-        self.add_input_port(InputPort("dataset", port_type=Dataset))
-        self.add_input_port(InputPort("layers", port_type=dial_core.KerasLayerListMIME))
+        self.add_input_port("dataset", port_type=Dataset)
+        self.add_input_port("layers", port_type=Dial.KerasLayerListMIME)
 
-        self.add_output_port(OutputPort("model", port_type=Model))
+        self.add_output_port("model", port_type=Model)
         self.outputs["model"].output_generator = self.get_model
 
     def get_model(self):

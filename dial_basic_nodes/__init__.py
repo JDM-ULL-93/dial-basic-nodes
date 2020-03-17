@@ -8,19 +8,25 @@ when working with classical Deep Learning problems.
 
 from dial_core.node_editor import NodeRegistrySingleton
 
-from .dataset_editor import DatasetEditorNodeFactory
-from .layers_editor import LayersEditorNodeFactory
-from .model_compiler import ModelCompilerNodeFactory
-from .test_node import TestNode
+from .dataset_editor import DatasetEditorNodeFactory, DatasetEditorNode
+from .layers_editor import LayersEditorNodeFactory, LayersEditorNode
+from .model_compiler import ModelCompilerNodeFactory, ModelCompilerNode
 
 
 def initialize_plugin():
     node_registry = NodeRegistrySingleton()
 
-    node_registry.register_node("Test Node", TestNode)
     node_registry.register_node("Dataset Editor", DatasetEditorNodeFactory)
     node_registry.register_node("Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Parameters Compiler", ModelCompilerNodeFactory)
 
 
-__all__ = ["TestNode", "initialize_plugin"]
+__all__ = [
+    "initialize_plugin",
+    "DatasetEditorNode",
+    "DatasetEditorNodeFactory",
+    "LayersEditorNode",
+    "LayersEditorNodeFactory",
+    "ModelCompilerNode",
+    "ModelCompilerNodeFactory",
+]

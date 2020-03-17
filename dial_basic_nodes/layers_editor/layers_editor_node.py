@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
 
-from dial_core.node_editor import Node, OutputPort
+from dial_core.node_editor import Node
+from dial_core.utils import Dial
 
 from .layers_editor_widget import LayersEditorWidgetFactory
 
@@ -16,9 +17,7 @@ class LayersEditorNode(Node):
     def __init__(self, layers_editor_widget: "LayersEditorWidget"):
         super().__init__(title="Layers Editor Node", inner_widget=layers_editor_widget)
 
-        self.add_output_port(
-            OutputPort("layers", port_type=dial_core.KerasLayerListMIME)
-        )
+        self.add_output_port(name="layers", port_type=Dial.KerasLayerListMIME)
         self.outputs["layers"].output_generator = self.get_model_layers
 
     def get_model_layers(self):  # TODO: Implement

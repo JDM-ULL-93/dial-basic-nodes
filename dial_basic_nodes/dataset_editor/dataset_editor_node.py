@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import dependency_injector.providers as providers
 
 from dial_core.datasets import Dataset
-from dial_core.node_editor import Node, OutputPort
+from dial_core.node_editor import Node
 
 from .dataset_editor_widget import DatasetEditorWidgetFactory
 
@@ -20,8 +20,8 @@ class DatasetEditorNode(Node):
         )
 
         # Ports
-        self.add_output_port(OutputPort("train", port_type=Dataset))
-        self.add_output_port(OutputPort("test", port_type=Dataset))
+        self.add_output_port(name="train", port_type=Dataset)
+        self.add_output_port(name="test", port_type=Dataset)
 
         self.outputs["train"].output_generator = self.get_train_dataset
         self.outputs["test"].output_generator = self.get_test_dataset

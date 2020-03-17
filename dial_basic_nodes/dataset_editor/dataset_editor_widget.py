@@ -1,7 +1,5 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING
-
 import dependency_injector.providers as providers
 from PySide2.QtCore import QSize
 from PySide2.QtWidgets import (
