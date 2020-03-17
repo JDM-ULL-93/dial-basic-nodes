@@ -6,7 +6,15 @@ From editing datasets to compiling models, this nodes should satisfy most of the
 when working with classical Deep Learning problems.
 """
 
+from dial_core.node_editor import NodeRegistrySingleton
+
 from .test_node import TestNode
 
 
-__all__ = ["TestNode"]
+def initialize_plugin():
+    node_registry = NodeRegistrySingleton()
+
+    node_registry.register_node("Test Node", TestNode)
+
+
+__all__ = ["TestNode", "initialize_plugin"]
