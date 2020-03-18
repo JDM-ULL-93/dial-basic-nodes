@@ -32,6 +32,9 @@ class DatasetEditorNode(Node):
     def get_test_dataset(self):  # TODO: Implement get_model_layers
         raise NotImplementedError("get_test_dataset not implemented!")
 
+    def __reduce__(self):
+        return (DatasetEditorNode, (DatasetEditorWidgetFactory(),))
+
 
 DatasetEditorNodeFactory = providers.Factory(
     DatasetEditorNode, dataset_editor_widget=DatasetEditorWidgetFactory

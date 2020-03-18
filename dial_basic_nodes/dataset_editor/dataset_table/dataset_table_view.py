@@ -2,7 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from PySide2.QtWidgets import QHeaderView, QTableView,QMenu
+from PySide2.QtWidgets import QHeaderView, QTableView, QMenu
+from PySide2.QtGui import QContextMenuEvent
 
 from .dataset_item_delegate import DatasetItemDelegate
 
@@ -30,7 +31,6 @@ class DatasetTableView(QTableView):
 
         menu.popup(event.globalPos())
         menu.addAction("Remove entries", lambda: self.deleteSelectedRows())
-
 
     def deleteSelectedRows(self):
         # When a row is deleted, the new row index is the last row index - 1

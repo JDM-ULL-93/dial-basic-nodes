@@ -32,21 +32,14 @@ class TrainTestTabs(QTabWidget):
         self.__test_view = datasettable_mv_factory.View(parent=self)
         self.__test_view.setModel(self.__test_model)
 
-        self.__setup_ui()
+        self.addTab(self.__train_view, "Train")
+        self.addTab(self.__test_view, "Test")
 
     def set_train_dataset(self, train_dataset: "Dataset"):
-        """
-        """
         self.__train_model.load_dataset(train_dataset)
 
     def set_test_dataset(self, test_dataset: "Dataset"):
-        """
-        """
         self.__test_model.load_dataset(test_dataset)
-
-    def __setup_ui(self):
-        self.addTab(self.__train_view, "Train")
-        self.addTab(self.__test_view, "Test")
 
 
 TrainTestTabsFactory = providers.Factory(

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt
 from PySide2.QtGui import QPixmapCache
 
-from dial_core.utils import Dial, log
+from dial_core.utils import log
 
 if TYPE_CHECKING:
     from dial_core.datasets import Dataset
@@ -119,7 +119,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.beginInsertRows(parent, row, row + count - 1)
 
-        x_set, y_set = self.__dataset.items(start=row, end=row + count, op="display")
+        x_set, y_set = self.__dataset.items(start=row, end=row + count)
 
         self.__x[row:row] = x_set
         self.__y[row:row] = y_set
@@ -167,8 +167,6 @@ class DatasetTableModel(QAbstractTableModel):
         del self.__x[row : row + count]
         del self.__y[row : row + count]
         self.__dataset.delete_rows(row, count)
-
-        print(self.__dataset.items(0, 6, op="display"))
 
         self.endRemoveRows()
         LOGGER.debug("Remove rows END")
