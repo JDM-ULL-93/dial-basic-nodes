@@ -12,7 +12,8 @@ from PySide2.QtCore import (
 )
 from tensorflow import keras
 
-from dial_gui.widgets.abstract_tree_model import AbstractTreeModel, AbstractTreeNode
+from .abstract_tree_model import AbstractTreeModel, AbstractTreeNode
+from dial_core.utils import Dial
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QWidget
@@ -113,7 +114,7 @@ class LayersTreeModel(AbstractTreeModel):
         MIME Types supported by this model. In this case, the only supported MIME type
         is the one representing a list of Keras Layer.
         """
-        return [dial_core.KerasLayerListMIME.value]
+        return [Dial.KerasLayerListMIME.value]
 
     def mimeData(self, indexes: List["QModelIndex"]) -> "QMimeData":
         """
@@ -133,6 +134,6 @@ class LayersTreeModel(AbstractTreeModel):
                 stream.writeQVariant(layer)
 
         # Store the serialized data on the MIME data
-        mime_data.setData(dial_core.KerasLayerListMIME.value, encoded_data)
+        mime_data.setData(Dial.KerasLayerListMIME.value, encoded_data)
 
         return mime_data

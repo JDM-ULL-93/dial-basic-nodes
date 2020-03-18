@@ -13,12 +13,20 @@ from .layers_editor import LayersEditorNodeFactory, LayersEditorNode
 from .model_compiler import ModelCompilerNodeFactory, ModelCompilerNode
 
 
-def initialize_plugin():
+def load_plugin():
     node_registry = NodeRegistrySingleton()
 
     node_registry.register_node("Dataset Editor", DatasetEditorNodeFactory)
     node_registry.register_node("Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Parameters Compiler", ModelCompilerNodeFactory)
+
+
+def unload_plugin():
+    node_registry = NodeRegistrySingleton()
+
+    node_registry.unregister_node("Dataset Editor")
+    node_registry.unregister_node("Layers Editor")
+    node_registry.unregister_node("Parameters Compiler")
 
 
 __all__ = [

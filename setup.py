@@ -21,7 +21,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='dial-basic-nodes',
-    version='0.2a0',
+    version='0.2a1',
     description='Basic nodes for the Dial app.',
     python_requires='<3.8,>=3.6',
     project_urls={
@@ -38,13 +38,14 @@ setup(
         'dial_basic_nodes.dataset_editor.datasets_list',
         'dial_basic_nodes.layers_editor',
         'dial_basic_nodes.layers_editor.layers_tree',
+        'dial_basic_nodes.layers_editor.layers_tree.abstract_tree_model',
         'dial_basic_nodes.layers_editor.model_table',
         'dial_basic_nodes.model_compiler',
         'dial_basic_nodes.model_compiler.parameters_form'
     ],
     package_dir={"": "."},
     package_data={},
-    install_requires=['dial-gui==0.*,>=0.6.0'],
+    install_requires=['dial-core==0.*,>=0.9.0', 'dial-gui==0.*,>=0.5.0'],
     extras_require={
         "dev": [
             "black==19.*,>=19.10.0", "docstr-coverage==1.*,>=1.0.5",
