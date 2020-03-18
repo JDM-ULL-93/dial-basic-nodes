@@ -21,7 +21,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='dial-basic-nodes',
-    version='0.1a1',
+    version='0.2a0',
     description='Basic nodes for the Dial app.',
     python_requires='<3.8,>=3.6',
     project_urls={
@@ -44,7 +44,7 @@ setup(
     ],
     package_dir={"": "."},
     package_data={},
-    install_requires=['dial-core==0.*,>=0.8.0', 'dial-gui==0.*,>=0.1.0'],
+    install_requires=['dial-gui==0.*,>=0.6.0'],
     extras_require={
         "dev": [
             "black==19.*,>=19.10.0", "docstr-coverage==1.*,>=1.0.5",
