@@ -41,6 +41,19 @@ class TrainTestTabs(QTabWidget):
     def set_test_dataset(self, test_dataset: "Dataset"):
         self.__test_model.load_dataset(test_dataset)
 
+    def __getstate__(self):
+        return {
+            "train_dataset": self.__train_model.dataset,
+            "test_dataset": self.__test_model.dataset,
+        }
+
+    def __setstate__(self, new_state):
+        self.set_train_dataset(new_state["train_dataset"])
+        self.set_test_dataset(new_state["test_dataset"])
+
+    def __reduce__(self):
+        return (TrainTestTabs, (DatasetTableMVFactory(),), self.__getstate__())
+
 
 TrainTestTabsFactory = providers.Factory(
     TrainTestTabs, datasettable_mv_factory=DatasetTableMVFactory

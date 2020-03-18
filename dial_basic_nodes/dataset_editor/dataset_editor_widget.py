@@ -85,6 +85,9 @@ class DatasetEditorWidget(QWidget):
             self.__train_len_label.setText(str(len(train)))
             self.__test_len_label.setText(str(len(test)))
 
+    def __reduce__(self):
+        return (DatasetEditorWidget, (self.__train_test_tabs,))
+
 
 DatasetEditorWidgetFactory = providers.Factory(
     DatasetEditorWidget, train_test_tabs=TrainTestTabsFactory

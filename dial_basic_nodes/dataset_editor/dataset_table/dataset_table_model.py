@@ -6,9 +6,9 @@ from PySide2.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt
 from PySide2.QtGui import QPixmapCache
 
 from dial_core.utils import log
+from dial_core.datasets import Dataset
 
 if TYPE_CHECKING:
-    from dial_core.datasets import Dataset
     from PySide2.QtWidgets import QObject
 
 
@@ -41,6 +41,10 @@ class DatasetTableModel(QAbstractTableModel):
             19: self.__data_type_role,
         }
 
+    @property
+    def dataset(self) -> "Dataset":
+        return self.__dataset
+
     def load_dataset(self, dataset: "Dataset"):
         """
         Load new Dataset data to the model.
@@ -52,8 +56,10 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.__x = []
         self.__y = []
-        self.__x_type = dataset.x_type  # type: ignore
-        self.__y_type = dataset.y_type  # type: ignore
+
+        if self.__dataset:
+            self.__x_type = dataset.x_type  # type: ignore
+            self.__y_type = dataset.y_type  # type: ignore
 
         QPixmapCache.clear()
 
@@ -119,7 +125,9 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.beginInsertRows(parent, row, row + count - 1)
 
-        x_set, y_set = self.__dataset.items(start=row, end=row + count)
+        x_set, y_set = self.__dataset.items(
+            start=row, end=row + count, role=Dataset.Role.Display
+        )
 
         self.__x[row:row] = x_set
         self.__y[row:row] = y_set
@@ -179,10 +187,10 @@ class DatasetTableModel(QAbstractTableModel):
         Return the text representation of the cell value.
         """
         if column == 0:
-            return self.__x[row]
+            return str(self.__x[row])
 
         if column == 1:
-            return self.__y[row]
+            return str(self.__y[row])
 
         return None
 
