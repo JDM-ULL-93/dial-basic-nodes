@@ -1,11 +1,9 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING
-
+import dependency_injector.providers as providers
 from PySide2.QtWidgets import QVBoxLayout, QWidget
 
-if TYPE_CHECKING:
-    from .containers import ModelTableMVFactory
+from .containers import ModelTableMVFactory
 
 
 class ModelTableWidget(QWidget):
@@ -31,5 +29,16 @@ class ModelTableWidget(QWidget):
 
         self.setLayout(self.__main_layout)
 
-    def set_model(self, model):
-        self.__model.load_layers(model.layers)
+    def __getstate__(self):
+        return {"layers": self.__model.layers}
+
+    def __setstate__(self, new_state):
+        self.__model.load_layers(new_state["layers"])
+
+    def __reduce__(self):
+        return (ModelTableWidget, (ModelTableMVFactory(),), self.__getstate__())
+
+
+ModelTableWidgetFactory = providers.Factory(
+    ModelTableWidget, modeltable_mv_factory=ModelTableMVFactory
+)

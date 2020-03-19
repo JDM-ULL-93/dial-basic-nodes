@@ -4,9 +4,8 @@
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
-from PySide2.QtWidgets import QGridLayout, QWidget
-
 from dial_core.utils import log
+from PySide2.QtWidgets import QGridLayout, QWidget
 
 from .parameters_form import ParametersFormFactory
 
@@ -26,12 +25,12 @@ class ModelCompilerWidget(QWidget):
         self.__parameters_form = parameters_form
 
         # Configure interface
-        self.__setup_ui()
-
-    def __setup_ui(self):
         self.__main_layout.addWidget(self.__parameters_form)
 
         self.setLayout(self.__main_layout)
+
+    def __reduce__(self):
+        return (ModelCompilerWidget, (self.__parameters_form,))
 
 
 ModelCompilerWidgetFactory = providers.Factory(

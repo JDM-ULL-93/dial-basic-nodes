@@ -85,8 +85,20 @@ class DatasetEditorWidget(QWidget):
             self.__train_len_label.setText(str(len(train)))
             self.__test_len_label.setText(str(len(test)))
 
+    def __getstate__(self):
+        return {
+            "dataset_name": self.__dataset_name_label.text(),
+            "train_len": self.__train_len_label.text(),
+            "test_len": self.__test_len_label.text(),
+        }
+
+    def __setstate__(self, new_state):
+        self.__dataset_name_label.setText(new_state["dataset_name"])
+        self.__train_len_label.setText(new_state["train_len"])
+        self.__test_len_label.setText(new_state["test_len"])
+
     def __reduce__(self):
-        return (DatasetEditorWidget, (self.__train_test_tabs,))
+        return (DatasetEditorWidget, (self.__train_test_tabs,), self.__getstate__())
 
 
 DatasetEditorWidgetFactory = providers.Factory(

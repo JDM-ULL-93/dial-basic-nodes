@@ -6,8 +6,8 @@ import dependency_injector.providers as providers
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtWidgets import QDockWidget, QMainWindow
 
-from .layers_tree import LayersTreeFactory
-from .model_table import ModelTableFactory
+from .layers_tree import LayersTreeWidgetFactory
+from .model_table import ModelTableWidgetFactory
 
 if TYPE_CHECKING:
     from .layers_tree import LayersTreeWidget
@@ -54,7 +54,12 @@ class LayersEditorWidget(QMainWindow):
 
         self.setCentralWidget(self.__model_table)
 
+    def __reduce__(self):
+        return (LayersEditorWidget, (self.__layers_tree, self.__model_table))
+
 
 LayersEditorWidgetFactory = providers.Factory(
-    LayersEditorWidget, layers_tree=LayersTreeFactory, model_table=ModelTableFactory
+    LayersEditorWidget,
+    layers_tree=LayersTreeWidgetFactory,
+    model_table=ModelTableWidgetFactory,
 )

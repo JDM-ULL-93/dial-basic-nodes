@@ -1,11 +1,9 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING
-
+import dependency_injector.providers as providers
 from PySide2.QtWidgets import QVBoxLayout, QWidget
 
-if TYPE_CHECKING:
-    from .containers import LayersTreeMVFactory
+from .containers import LayersTreeMVFactory
 
 
 class LayersTreeWidget(QWidget):
@@ -28,3 +26,11 @@ class LayersTreeWidget(QWidget):
         self.__main_layout.addWidget(self.__view)
 
         self.setLayout(self.__main_layout)
+
+    def __reduce__(self):
+        return (LayersTreeWidget, (LayersTreeMVFactory(),))
+
+
+LayersTreeWidgetFactory = providers.Factory(
+    LayersTreeWidget, layerstree_mv_factory=LayersTreeMVFactory
+)

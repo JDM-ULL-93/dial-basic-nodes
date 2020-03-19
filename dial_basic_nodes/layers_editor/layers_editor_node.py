@@ -23,6 +23,9 @@ class LayersEditorNode(Node):
     def get_model_layers(self):  # TODO: Implement
         raise NotImplementedError("get_model_layers not implemented!")
 
+    def __reduce__(self):
+        return (LayersEditorNode, (self.inner_widget,))
+
 
 LayersEditorNodeFactory = providers.Factory(
     LayersEditorNode, layers_editor_widget=LayersEditorWidgetFactory

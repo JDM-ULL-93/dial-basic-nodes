@@ -16,8 +16,8 @@ keywords = ["deep-learning", "dial-app"]
 [tool.poetry.dependencies]
 python = ">=3.6,<3.8"
 
-dial-core = "^0.9a0"
-dial-gui = "^0.5a0"
+dial-core = "^0.9a2"
+dial-gui = "^0.6a0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.1"

@@ -9,14 +9,8 @@ import dependency_injector.providers as providers
 
 from .model_table_model import ModelTableModel
 from .model_table_view import ModelTableView
-from .model_table_widget import ModelTableWidget
 
 
 class ModelTableMVFactory(containers.DeclarativeContainer):
     Model = providers.Factory(ModelTableModel)
     View = providers.Factory(ModelTableView)
-
-
-ModelTableFactory = providers.Factory(
-    ModelTableWidget, modeltable_mv_factory=ModelTableMVFactory
-)

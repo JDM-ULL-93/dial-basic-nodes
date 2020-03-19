@@ -45,7 +45,7 @@ setup(
     ],
     package_dir={"": "."},
     package_data={},
-    install_requires=['dial-core==0.*,>=0.9.0', 'dial-gui==0.*,>=0.5.0'],
+    install_requires=['dial-core==0.*,>=0.9.0', 'dial-gui==0.*,>=0.6.0'],
     extras_require={
         "dev": [
             "black==19.*,>=19.10.0", "docstr-coverage==1.*,>=1.0.5",

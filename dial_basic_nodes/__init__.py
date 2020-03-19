@@ -30,7 +30,8 @@ def unload_plugin():
 
 
 __all__ = [
-    "initialize_plugin",
+    "load_plugin",
+    "unload_plugin",
     "DatasetEditorNode",
     "DatasetEditorNodeFactory",
     "LayersEditorNode",

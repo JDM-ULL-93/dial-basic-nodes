@@ -3,11 +3,10 @@
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
-from tensorflow.keras import Model
-
 from dial_core.datasets import Dataset
 from dial_core.node_editor import Node
 from dial_core.utils import Dial
+from tensorflow.keras import Model
 
 from .model_compiler_widget import ModelCompilerWidgetFactory
 
@@ -30,6 +29,9 @@ class ModelCompilerNode(Node):
 
     def get_model(self):
         raise NotImplementedError("get_model is not implemented!")
+
+    def __reduce__(self):
+        return (ModelCompilerNode, (self.inner_widget,))
 
 
 ModelCompilerNodeFactory = providers.Factory(
