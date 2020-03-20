@@ -33,7 +33,7 @@ class DatasetEditorNode(Node):
         raise NotImplementedError("get_test_dataset not implemented!")
 
     def __reduce__(self):
-        return (DatasetEditorNode, (self.inner_widget,))
+        return (DatasetEditorNode, (self.inner_widget,), super().__getstate__())
 
 
 DatasetEditorNodeFactory = providers.Factory(

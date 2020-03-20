@@ -31,7 +31,7 @@ class ModelCompilerNode(Node):
         raise NotImplementedError("get_model is not implemented!")
 
     def __reduce__(self):
-        return (ModelCompilerNode, (self.inner_widget,))
+        return (ModelCompilerNode, (self.inner_widget,), super().__getstate__())
 
 
 ModelCompilerNodeFactory = providers.Factory(
