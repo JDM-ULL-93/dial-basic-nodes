@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
-
 from dial_core.datasets import Dataset
 from dial_core.node_editor import Node
 
@@ -23,14 +22,8 @@ class DatasetEditorNode(Node):
         self.add_output_port(name="train", port_type=Dataset)
         self.add_output_port(name="test", port_type=Dataset)
 
-        self.outputs["train"].output_generator = self.get_train_dataset
-        self.outputs["test"].output_generator = self.get_test_dataset
-
-    def get_train_dataset(self):  # TODO: Implement
-        raise NotImplementedError("get_train_dataset not implemented!")
-
-    def get_test_dataset(self):  # TODO: Implement get_model_layers
-        raise NotImplementedError("get_test_dataset not implemented!")
+        self.outputs["train"].output_generator = self.inner_widget.train_dataset
+        self.outputs["test"].output_generator = self.inner_widget.test_dataset
 
     def __reduce__(self):
         return (DatasetEditorNode, (self.inner_widget,), super().__getstate__())

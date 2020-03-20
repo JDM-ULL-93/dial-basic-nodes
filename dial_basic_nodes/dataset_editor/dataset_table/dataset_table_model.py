@@ -2,11 +2,10 @@
 
 from typing import TYPE_CHECKING, Any, List, Optional
 
+from dial_core.datasets import Dataset
+from dial_core.utils import log
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt
 from PySide2.QtGui import QPixmapCache
-
-from dial_core.utils import log
-from dial_core.datasets import Dataset
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
@@ -174,7 +173,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         del self.__x[row : row + count]
         del self.__y[row : row + count]
-        self.__dataset.delete_rows(row, count)
+        self.__dataset.delete_rows(row, count)  # type: ignore
 
         self.endRemoveRows()
         LOGGER.debug("Remove rows END")

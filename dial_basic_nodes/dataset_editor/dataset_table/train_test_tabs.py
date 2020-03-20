@@ -35,6 +35,12 @@ class TrainTestTabs(QTabWidget):
         self.addTab(self.__train_view, "Train")
         self.addTab(self.__test_view, "Test")
 
+    def train_dataset(self) -> "Dataset":
+        return self.__train_model.dataset
+
+    def test_dataset(self) -> "Dataset":
+        return self.__test_model.dataset
+
     def set_train_dataset(self, train_dataset: "Dataset"):
         self.__train_model.load_dataset(train_dataset)
 

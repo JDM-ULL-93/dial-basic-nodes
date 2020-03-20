@@ -1,6 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 import dependency_injector.providers as providers
+from dial_core.datasets import Dataset
 from PySide2.QtCore import QSize
 from PySide2.QtWidgets import (
     QFormLayout,
@@ -41,6 +42,12 @@ class DatasetEditorWidget(QWidget):
 
         # Connections
         self.__dataset_loader_button.clicked.connect(self.__load_predefined_dataset)
+
+    def train_dataset(self) -> "Dataset":
+        return self.__train_test_tabs.train_dataset()
+
+    def test_dataset(self) -> "Dataset":
+        return self.__train_test_tabs.test_dataset()
 
     def sizeHint(self) -> "QSize":
         return QSize(500, 300)
