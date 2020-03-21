@@ -2,10 +2,11 @@
 
 from typing import TYPE_CHECKING, Any, List, Optional
 
-from dial_core.datasets import Dataset
-from dial_core.utils import log
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt
 from PySide2.QtGui import QPixmapCache
+
+from dial_core.datasets import Dataset
+from dial_core.utils import log
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
@@ -22,8 +23,8 @@ class DatasetTableModel(QAbstractTableModel):
     def __init__(self, parent: "QObject" = None):
         super().__init__(parent)
 
-        self.__x: List[Any] = []
-        self.__y: List[Any] = []
+        self.__x_cached: List[Any] = []
+        self.__y_cached: List[Any] = []
         self.__x_type = None
         self.__y_type = None
 
@@ -53,8 +54,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.__dataset = dataset
 
-        self.__x = []
-        self.__y = []
+        self.__x_cached = []
+        self.__y_cached = []
 
         if self.__dataset:
             self.__x_type = dataset.x_type  # type: ignore
@@ -69,7 +70,7 @@ class DatasetTableModel(QAbstractTableModel):
         """
         Return the number of rows.
         """
-        return len(self.__x)
+        return len(self.__x_cached)
 
     def columnCount(self, parent=QModelIndex()):
         """
@@ -118,22 +119,17 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.insertRows(self.rowCount(), items_to_fetch)
 
-    def insertRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
-        if not self.__dataset:
-            return False
+    def index(self, row: int, column: int, parent=QModelIndex()):
+        if row < 0:
+            return QModelIndex()
 
-        self.beginInsertRows(parent, row, row + count - 1)
+        if column == 0:
+            return self.createIndex(row, column, self.__x_cached[row])
 
-        x_set, y_set = self.__dataset.items(
-            start=row, end=row + count, role=Dataset.Role.Display
-        )
+        if column == 1:
+            return self.createIndex(row, column, self.__y_cached[row])
 
-        self.__x[row:row] = x_set
-        self.__y[row:row] = y_set
-
-        self.endInsertRows()
-
-        return True
+        return QModelIndex()
 
     def data(self, index: "QModelIndex", role=Qt.DisplayRole):
         """
@@ -148,17 +144,55 @@ class DatasetTableModel(QAbstractTableModel):
 
         return None
 
-    def index(self, row: int, column: int, parent=QModelIndex()):
-        if row < 0:
-            return QModelIndex()
+    def setData(
+        self, index: "QModelIndex", value: Any, role: int = Qt.EditRole
+    ) -> bool:
+        if not index.isValid():
+            return False
 
-        if column == 0:
-            return self.createIndex(row, column, self.__x[row])
+        # TODO: Modify Dataset too
+        if role == Qt.EditRole:
+            if index.column() == 0 and self.__x_type:
+                self.__x_cached[index.row()] = self.__x_type.display(
+                    self.__x_type.expected_dataset_format(value)
+                )
 
-        if column == 1:
-            return self.createIndex(row, column, self.__y[row])
+            if index.column() == 1 and self.__y_type:
+                self.__y_cached[index.row()] = self.__y_type.display(
+                    self.__y_type.expected_dataset_format(value)
+                )
 
-        return QModelIndex()
+        return True
+
+    def flags(self, index: "QModelIndex") -> int:
+        general_flags = super().flags(index)
+
+        if index.column() == 0:
+            if self.__x_type and self.__x_type.is_editable:
+                return general_flags | Qt.ItemIsEditable
+
+        if index.column() == 1:
+            if self.__y_type and self.__y_type.is_editable:
+                return general_flags | Qt.ItemIsEditable
+
+        return general_flags
+
+    def insertRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
+        if not self.__dataset:
+            return False
+
+        self.beginInsertRows(parent, row, row + count - 1)
+
+        x_set, y_set = self.__dataset.items(
+            start=row, end=row + count, role=Dataset.Role.Display
+        )
+
+        self.__x_cached[row:row] = x_set
+        self.__y_cached[row:row] = y_set
+
+        self.endInsertRows()
+
+        return True
 
     def removeRows(self, row: int, count: int, index=QModelIndex()) -> bool:
         """
@@ -171,8 +205,8 @@ class DatasetTableModel(QAbstractTableModel):
         LOGGER.debug("Previous model size: %s", self.rowCount())
         self.beginRemoveRows(QModelIndex(), row, row + count - 1)
 
-        del self.__x[row : row + count]
-        del self.__y[row : row + count]
+        del self.__x_cached[row : row + count]
+        del self.__y_cached[row : row + count]
         self.__dataset.delete_rows(row, count)  # type: ignore
 
         self.endRemoveRows()
@@ -186,10 +220,10 @@ class DatasetTableModel(QAbstractTableModel):
         Return the text representation of the cell value.
         """
         if column == 0:
-            return str(self.__x[row])
+            return str(self.__x_cached[row])
 
         if column == 1:
-            return str(self.__y[row])
+            return str(self.__y_cached[row])
 
         return None
 
