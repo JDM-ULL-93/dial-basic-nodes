@@ -43,6 +43,9 @@ class DatasetEditorWidget(QWidget):
         # Connections
         self.__dataset_loader_button.clicked.connect(self.__load_predefined_dataset)
 
+        self.__train_test_tabs.train_dataset_changed.connect(self.__update_train_labels)
+        self.__train_test_tabs.test_dataset_changed.connect(self.__update_test_labels)
+
     def train_dataset(self) -> "Dataset":
         return self.__train_test_tabs.train_dataset()
 
@@ -89,8 +92,14 @@ class DatasetEditorWidget(QWidget):
             self.__train_test_tabs.set_test_dataset(test)
 
             self.__dataset_name_label.setText(dataset_loader.name)
-            self.__train_len_label.setText(str(len(train)))
-            self.__test_len_label.setText(str(len(test)))
+            self.__update_train_labels(train)
+            self.__update_test_labels(test)
+
+    def __update_train_labels(self, dataset):
+        self.__train_len_label.setText(str(dataset.row_count()))
+
+    def __update_test_labels(self, dataset):
+        self.__test_len_label.setText(str(dataset.row_count()))
 
     def __getstate__(self):
         return {

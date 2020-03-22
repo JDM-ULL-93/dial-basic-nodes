@@ -56,7 +56,6 @@ class ParametersForm(QWidget):
         }
 
     def __setstate__(self, new_state):
-        print(new_state)
         self.__epoch_spinbox.setValue(new_state["epoch"])
         self.__loss_function_combobox.setCurrentIndex(
             self.__loss_function_combobox.findText(new_state["loss_function"])

@@ -4,11 +4,12 @@
 from typing import TYPE_CHECKING
 
 import qimage2ndarray
+from dial_core.datasets import datatype
 from PySide2.QtCore import QRect, QSize, Qt
 from PySide2.QtGui import QPixmap, QPixmapCache
 from PySide2.QtWidgets import QStyledItemDelegate
 
-from dial_core.datasets import datatype
+from .dataset_table_model import DatasetTableModel
 
 if TYPE_CHECKING:
     from PySide2.QtCore import QModelIndex
@@ -33,34 +34,37 @@ class DatasetItemDelegate(QStyledItemDelegate):
         """
         Paint the element according to its type.
         """
-        # Get the data type (Image, Numeric...)
-        data_type = index.data(19)
+        if not index.isValid():
+            return None
+
+        raw_data = index.data(Qt.DisplayRole)
+        data_type = index.data(DatasetTableModel.TypeRole)
 
         # Draw image
         if isinstance(data_type, datatype.ImageArray):
-            self.__paint_pixmap(painter, option, index)
+            self.__paint_pixmap(raw_data, painter, option, index)
 
         # Draw anything else as a string
         else:
-            self.__paint_string(painter, option, index)
+            self.__paint_string(raw_data, data_type, painter, option, index)
 
     def __paint_pixmap(
-        self, painter: "QPainter", option: "QStyleOptionViewItem", index: "QModelIndex"
+        self,
+        raw_data,
+        painter: "QPainter",
+        option: "QStyleOptionViewItem",
+        index: "QModelIndex",
     ):
         """
         Paint a pixmap centered on the cell.
         Generated pixmaps are saved on cache by the name "dataset_row_col"
         """
 
-        raw_data = index.internalPointer()
-
         # Load Qt pixap from array
         pix = QPixmap()
         pix_name = str(id(raw_data))
 
         if not QPixmapCache.find(pix_name, pix):
-            # Get image raw array
-
             # Load pix from raw array
             pix = QPixmap.fromImage(qimage2ndarray.array2qimage(raw_data))
 
@@ -79,26 +83,24 @@ class DatasetItemDelegate(QStyledItemDelegate):
         painter.drawPixmap(draw_rect, pix)
 
     def __paint_string(
-        self, painter: "QPainter", option: "QStyleOptionViewItem", index: "QModelIndex"
+        self,
+        raw_data,
+        data_type,
+        painter: "QPainter",
+        option: "QStyleOptionViewItem",
+        index: "QModelIndex",
     ):
         """
         Paint a value that can be converted to string.
         """
-
-        # Get numeric raw value as a string
-        display_text = index.data(Qt.DisplayRole)
-
         alignment = Qt.AlignCenter
-
-        # Get the datatype
-        data_type = index.data(19)
 
         # Align arrays to left
         if isinstance(data_type, datatype.NumericArray):
             alignment = Qt.AlignLeft
 
         # Paint it
-        painter.drawText(option.rect, alignment, display_text)
+        painter.drawText(option.rect, alignment, raw_data)
 
     def sizeHint(self, option: "QStyleOptionViewItem", index: "QModelIndex"):
         """
