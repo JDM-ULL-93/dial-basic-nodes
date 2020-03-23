@@ -4,10 +4,11 @@
 from typing import TYPE_CHECKING
 
 import qimage2ndarray
-from dial_core.datasets import datatype
 from PySide2.QtCore import QRect, QSize, Qt
 from PySide2.QtGui import QPixmap, QPixmapCache
 from PySide2.QtWidgets import QStyledItemDelegate
+
+from dial_core.datasets import datatype
 
 from .dataset_table_model import DatasetTableModel
 
@@ -41,12 +42,15 @@ class DatasetItemDelegate(QStyledItemDelegate):
         data_type = index.data(DatasetTableModel.TypeRole)
 
         # Draw image
-        if isinstance(data_type, datatype.ImageArray):
-            self.__paint_pixmap(raw_data, painter, option, index)
+        try:
+            if isinstance(data_type, datatype.ImageArray):
+                self.__paint_pixmap(raw_data, painter, option, index)
 
-        # Draw anything else as a string
-        else:
-            self.__paint_string(raw_data, data_type, painter, option, index)
+            # Draw anything else as a string
+            else:
+                self.__paint_string(raw_data, data_type, painter, option, index)
+        except ValueError:
+            self.__paint_string("<Can't Display>", data_type, painter, option, index)
 
     def __paint_pixmap(
         self,
@@ -100,7 +104,7 @@ class DatasetItemDelegate(QStyledItemDelegate):
             alignment = Qt.AlignLeft
 
         # Paint it
-        painter.drawText(option.rect, alignment, raw_data)
+        painter.drawText(option.rect, alignment, str(raw_data))
 
     def sizeHint(self, option: "QStyleOptionViewItem", index: "QModelIndex"):
         """

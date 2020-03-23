@@ -2,9 +2,19 @@
 
 from typing import TYPE_CHECKING
 
-from dial_core.utils import log
+from PySide2.QtCore import QPoint, Qt
 from PySide2.QtGui import QContextMenuEvent
-from PySide2.QtWidgets import QAbstractItemView, QHeaderView, QMenu, QTableView
+from PySide2.QtWidgets import (
+    QAbstractItemView,
+    QAction,
+    QActionGroup,
+    QHeaderView,
+    QMenu,
+    QTableView,
+)
+
+from dial_core.datasets.datatype import DataTypeContainer
+from dial_core.utils import log
 
 from .dataset_item_delegate import DatasetItemDelegate
 
@@ -23,12 +33,46 @@ class DatasetTableView(QTableView):
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 
+        # for (name, loader) in DataTypeContainer.providers.items():
+        #     print(name)
+        #     self.__header_context_menu.addAction(name)
+
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
 
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         self.setItemDelegate(DatasetItemDelegate())
+
+        self.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.horizontalHeader().customContextMenuRequested.connect(
+            self.__show_header_datatype_selection_menu
+        )
+
+        self.__input_datatypes_menu = QMenu(self)
+        self.__output_datatypes_menu = QMenu(self)
+        self.__input_datatypes_actions = QActionGroup(self)
+        self.__output_datatypes_actions = QActionGroup(self)
+        self.__fill_datatypes_menus()
+
+    def __fill_datatypes_menus(self):
+        for name in DataTypeContainer.providers.keys():
+            action = QAction(name)
+            action.triggered.connect(
+                lambda _=None, name=name: self.model().set_input_datatype(name)
+            )
+
+            self.__input_datatypes_actions.addAction(action)
+            self.__input_datatypes_menu.addAction(action)
+
+        for name in DataTypeContainer.providers.keys():
+            action = QAction(name)
+            action.triggered.connect(
+                lambda _=None, name=name: self.model().set_output_datatype(name)
+            )
+
+            self.__output_datatypes_actions.addAction(action)
+            self.__output_datatypes_menu.addAction(action)
 
     def contextMenuEvent(self, event: "QContextMenuEvent"):
         """Show a context menu for modifying dataset entries."""
@@ -71,3 +115,13 @@ class DatasetTableView(QTableView):
             self.model().removeRows(row=chunks[0], count=(chunks[1] - chunks[0] + 1))
 
         self.clearSelection()
+
+    def __show_header_datatype_selection_menu(self, point: "QPoint"):
+        if point.x() < self.horizontalHeader().length() / 2:
+            self.__input_datatypes_menu.popup(
+                self.horizontalHeader().mapToGlobal(point)
+            )
+        else:
+            self.__output_datatypes_menu.popup(
+                self.horizontalHeader().mapToGlobal(point)
+            )

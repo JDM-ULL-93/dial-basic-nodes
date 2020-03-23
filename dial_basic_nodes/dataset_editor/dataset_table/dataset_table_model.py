@@ -1,14 +1,13 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from dial_core.datasets import Dataset
-from dial_core.datasets.datatype import DataType
+from dial_core.datasets.datatype import DataType, DataTypeContainer
 from dial_core.utils import log
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PySide2.QtGui import QPixmapCache
-from PySide2.QtWidgets import QMessageBox, QWidget
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QObject
@@ -40,6 +39,9 @@ class DatasetTableModel(QAbstractTableModel):
         self.__cached_data: List[List[Any]] = [[], []]
         self.__types: List[Optional[DataType]] = [None, None]
 
+        self.__x_used_types: Dict[str, DataType] = {}
+        self.__y_used_types: Dict[str, DataType] = {}
+
         self.__dataset: Optional["Dataset"] = None
 
         self.max_row_count = 100
@@ -63,14 +65,38 @@ class DatasetTableModel(QAbstractTableModel):
         self.__dataset = dataset
 
         self.__cached_data = [[], []]
+        self.__x_used_types = {}
+        self.__y_used_types = {}
 
         if self.__dataset:
             self.__types = [dataset.x_type, dataset.y_type]
+            self.__x_used_types[type(dataset.x_type).__name__] = dataset.x_type
+            self.__y_used_types[type(dataset.y_type).__name__] = dataset.y_type
 
         QPixmapCache.clear()
 
         # Model has been reset, redraw view
         self.modelReset.emit()
+
+    def set_input_datatype(self, datatype_name):
+        try:
+            datatype = self.__x_used_types[datatype_name]
+        except KeyError:
+            datatype = getattr(DataTypeContainer, datatype_name)()
+            self.__x_used_types[datatype_name] = datatype
+
+        self.__types[0] = datatype
+        print("Input: Using", self.__types[0])
+
+    def set_output_datatype(self, datatype_name):
+        try:
+            datatype = self.__y_used_types[datatype_name]
+        except KeyError:
+            datatype = getattr(DataTypeContainer, datatype_name)()
+            self.__y_used_types[datatype_name] = datatype
+
+        self.__types[1] = datatype
+        print("Output: Using", self.__types[1])
 
     def rowCount(self, parent=QModelIndex()) -> int:
         """
@@ -96,7 +122,10 @@ class DatasetTableModel(QAbstractTableModel):
 
         # Column header must have their respective names
         if orientation == Qt.Horizontal:
-            return self.ColumnLabel(section).name
+            return (
+                f"{self.ColumnLabel(section).name} "
+                f"({type(self.__types[section]).__name__})"
+            )
 
         # Row header will have the row number as name
         if orientation == Qt.Vertical:
