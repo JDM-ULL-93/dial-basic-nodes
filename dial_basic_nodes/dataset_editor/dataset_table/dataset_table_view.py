@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from dial_core.datasets.datatype import DataTypeContainer
+from dial_core.utils import log
 from PySide2.QtCore import QPoint, Qt
 from PySide2.QtGui import QContextMenuEvent
 from PySide2.QtWidgets import (
@@ -12,9 +14,6 @@ from PySide2.QtWidgets import (
     QMenu,
     QTableView,
 )
-
-from dial_core.datasets.datatype import DataTypeContainer
-from dial_core.utils import log
 
 from .dataset_item_delegate import DatasetItemDelegate
 
@@ -32,10 +31,6 @@ class DatasetTableView(QTableView):
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
-
-        # for (name, loader) in DataTypeContainer.providers.items():
-        #     print(name)
-        #     self.__header_context_menu.addAction(name)
 
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
@@ -79,7 +74,8 @@ class DatasetTableView(QTableView):
         menu = QMenu(parent=self)
 
         menu.popup(event.globalPos())
-        menu.addAction("Remove entries", lambda: self.deleteSelectedRows())
+        menu.addAction("Remove rows", lambda: self.deleteSelectedRows())
+        menu.addAction("Insert row", lambda: self.insertRow())
 
     def deleteSelectedRows(self):
         # When a row is deleted, the new row index is the last row index - 1

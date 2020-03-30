@@ -22,8 +22,10 @@ class DatasetEditorNode(Node):
         self.add_output_port(name="train", port_type=Dataset)
         self.add_output_port(name="test", port_type=Dataset)
 
-        self.outputs["train"].output_generator = self.inner_widget.train_dataset
-        self.outputs["test"].output_generator = self.inner_widget.test_dataset
+        self.outputs["train"].set_generator_function(
+            self.inner_widget.get_train_dataset
+        )
+        self.outputs["test"].set_generator_function(self.inner_widget.get_test_dataset)
 
     def __reduce__(self):
         return (DatasetEditorNode, (self.inner_widget,), super().__getstate__())

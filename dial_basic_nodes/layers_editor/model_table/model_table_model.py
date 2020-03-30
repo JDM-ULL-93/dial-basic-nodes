@@ -12,6 +12,7 @@ from PySide2.QtCore import (
     QMimeData,
     QModelIndex,
     Qt,
+    Signal,
 )
 
 if TYPE_CHECKING:
@@ -30,6 +31,8 @@ class ModelTableModel(QAbstractTableModel):
     allows adding layers through a drop event (layers must have "Dial.KerasLayerMIME"
     MIME type)
     """
+
+    layers_modified = Signal(object)
 
     class Column(IntEnum):
         Type = 0
@@ -166,13 +169,16 @@ class ModelTableModel(QAbstractTableModel):
         if role == Qt.CheckStateRole:
             if index.column() == self.Column.Trainable:
                 layer.trainable = bool(value)
+                self.layers_modified.emit(self.__layers)
 
         if role == Qt.EditRole:
             if index.column() == self.Column.Name:
                 layer._name = str(value)
+                self.layers_modified.emit(self.__layers)
 
             if index.column() == self.Column.Units:
                 layer.units = int(value)
+                self.layers_modified.emit(self.__layers)
 
         LOGGER.info("New layer config: %s", layer.get_config())
 
@@ -293,6 +299,8 @@ class ModelTableModel(QAbstractTableModel):
         LOGGER.debug("Insert rows END")
         LOGGER.debug("New model size: %s", self.rowCount())
 
+        self.layers_modified.emit(self.layers)
+
         return True
 
     def removeRows(self, row: int, count: int, index=QModelIndex()) -> bool:
@@ -316,6 +324,8 @@ class ModelTableModel(QAbstractTableModel):
         self.endRemoveRows()
         LOGGER.debug("Remove rows END")
         LOGGER.debug("New model size: %s", self.rowCount())
+
+        self.layers_modified.emit(self.layers)
 
         return True
 
@@ -343,6 +353,8 @@ class ModelTableModel(QAbstractTableModel):
         )
 
         self.endMoveRows()
+
+        self.layers_modified.emit(self.layers)
 
         return True
 

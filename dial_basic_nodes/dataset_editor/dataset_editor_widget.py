@@ -45,11 +45,13 @@ class DatasetEditorWidget(QWidget):
 
         self.__train_test_tabs.train_dataset_changed.connect(self.__update_train_labels)
         self.__train_test_tabs.test_dataset_changed.connect(self.__update_test_labels)
+        self.__update_train_labels(self.get_train_dataset())
+        self.__update_test_labels(self.get_test_dataset())
 
-    def train_dataset(self) -> "Dataset":
+    def get_train_dataset(self) -> "Dataset":
         return self.__train_test_tabs.train_dataset()
 
-    def test_dataset(self) -> "Dataset":
+    def get_test_dataset(self) -> "Dataset":
         return self.__train_test_tabs.test_dataset()
 
     def sizeHint(self) -> "QSize":

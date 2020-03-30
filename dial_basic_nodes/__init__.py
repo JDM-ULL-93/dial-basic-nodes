@@ -8,9 +8,10 @@ when working with classical Deep Learning problems.
 
 from dial_core.node_editor import NodeRegistrySingleton
 
-from .dataset_editor import DatasetEditorNodeFactory, DatasetEditorNode
-from .layers_editor import LayersEditorNodeFactory, LayersEditorNode
-from .model_compiler import ModelCompilerNodeFactory, ModelCompilerNode
+from .dataset_editor import DatasetEditorNode, DatasetEditorNodeFactory
+from .layers_editor import LayersEditorNode, LayersEditorNodeFactory
+from .model_compiler import ModelCompilerNode, ModelCompilerNodeFactory
+from .training_console import TrainingConsoleNode, TrainingConsoleNodeFactory
 
 
 def load_plugin():
@@ -19,6 +20,7 @@ def load_plugin():
     node_registry.register_node("Dataset Editor", DatasetEditorNodeFactory)
     node_registry.register_node("Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Parameters Compiler", ModelCompilerNodeFactory)
+    node_registry.register_node("Training Console", TrainingConsoleNodeFactory)
 
 
 def unload_plugin():
@@ -27,6 +29,7 @@ def unload_plugin():
     node_registry.unregister_node("Dataset Editor")
     node_registry.unregister_node("Layers Editor")
     node_registry.unregister_node("Parameters Compiler")
+    node_registry.unregister_node("Training Console")
 
 
 __all__ = [
@@ -38,4 +41,6 @@ __all__ = [
     "LayersEditorNodeFactory",
     "ModelCompilerNode",
     "ModelCompilerNodeFactory",
+    "TrainingConsoleNode",
+    "TrainingConsoleNodeFactory",
 ]

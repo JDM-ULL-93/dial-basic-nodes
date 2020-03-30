@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 import dependency_injector.providers as providers
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QComboBox, QFormLayout, QPushButton, QSpinBox, QWidget
 
 
@@ -9,6 +9,8 @@ class ParametersForm(QWidget):
     """
     Form for changing the parameters used for the training process.
     """
+
+    compile_model = Signal()
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
@@ -25,7 +27,7 @@ class ParametersForm(QWidget):
         )
 
         self.__optimizer_combobox = QComboBox()
-        self.__optimizer_combobox.addItems(["adam", "sgd", "rmsprop"])
+        self.__optimizer_combobox.addItems(["Adam", "SDG", "RMSprop"])
 
         self.__batch_size_spinbox = QSpinBox()
         self.__batch_size_spinbox.setRange(1, 99999999)
@@ -45,7 +47,15 @@ class ParametersForm(QWidget):
 
         self.setLayout(self.__main_layout)
 
-        # self.__compile_button.clicked.connect(lambda: self.compile_model.emit())
+        self.__compile_button.clicked.connect(lambda: self.compile_model.emit())
+
+    @property
+    def optimizer(self) -> str:
+        return self.__optimizer_combobox.currentText()
+
+    @property
+    def loss_function(self) -> str:
+        return self.__loss_function_combobox.currentText()
 
     def __getstate__(self):
         return {

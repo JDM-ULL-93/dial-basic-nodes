@@ -4,10 +4,9 @@
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
+from dial_core.datasets import Dataset
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QTabWidget
-
-from dial_core.datasets import Dataset
 
 from .containers import DatasetTableMVFactory
 
@@ -41,11 +40,14 @@ class TrainTestTabs(QTabWidget):
         self.addTab(self.__test_view, "Test")
 
         self.__train_model.rowsRemoved.connect(
-            lambda: self.train_dataset_changed.emit(self.__train_model.dataset)
+            lambda: self.train_dataset_changed.emit(self.train_dataset)
         )
         self.__test_model.rowsRemoved.connect(
-            lambda: self.test_dataset_changed.emit(self.__test_model.dataset)
+            lambda: self.test_dataset_changed.emit(self.test_dataset)
         )
+
+        self.set_train_dataset(train_dataset=Dataset())
+        self.set_test_dataset(test_dataset=Dataset())
 
     def train_dataset(self) -> "Dataset":
         return self.__train_model.dataset
@@ -55,9 +57,11 @@ class TrainTestTabs(QTabWidget):
 
     def set_train_dataset(self, train_dataset: "Dataset"):
         self.__train_model.load_dataset(train_dataset)
+        self.train_dataset_changed.emit(train_dataset)
 
     def set_test_dataset(self, test_dataset: "Dataset"):
         self.__test_model.load_dataset(test_dataset)
+        self.test_dataset_changed.emit(test_dataset)
 
     def __getstate__(self):
         return {

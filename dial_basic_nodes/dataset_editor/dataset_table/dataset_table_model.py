@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from dial_core.datasets import Dataset
-from dial_core.datasets.datatype import DataType, DataTypeContainer
+from dial_core.datasets.datatype import DataType, DataTypeContainer, Numeric
 from dial_core.utils import log
 from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PySide2.QtGui import QPixmapCache
@@ -86,6 +86,7 @@ class DatasetTableModel(QAbstractTableModel):
             self.__x_used_types[datatype_name] = datatype
 
         self.__types[0] = datatype
+        self.__dataset.x_datatype = datatype
         print("Input: Using", self.__types[0])
 
     def set_output_datatype(self, datatype_name):
@@ -96,6 +97,7 @@ class DatasetTableModel(QAbstractTableModel):
             self.__y_used_types[datatype_name] = datatype
 
         self.__types[1] = datatype
+        self.__dataset.y_datatype = datatype
         print("Output: Using", self.__types[1])
 
     def rowCount(self, parent=QModelIndex()) -> int:
@@ -150,9 +152,24 @@ class DatasetTableModel(QAbstractTableModel):
         items_to_fetch = min(remainder, self.max_row_count)
 
         if items_to_fetch <= 0:
-            return
+            return False
 
-        self.insertRows(self.rowCount(), items_to_fetch, parent)
+        # Load new rows to the cached array
+        row = self.rowCount()
+        count = items_to_fetch
+
+        self.beginInsertRows(QModelIndex(), row, row + count - 1)
+
+        x_set, y_set = self.__dataset.items(
+            start=row, end=row + count, role=Dataset.Role.Display
+        )
+
+        self.__cached_data[self.ColumnLabel.Input][row:row] = x_set
+        self.__cached_data[self.ColumnLabel.Output][row:row] = y_set
+
+        self.endInsertRows()
+
+        return True
 
     def index(self, row: int, column: int, parent=QModelIndex()):
         if row < 0 or row > self.rowCount():
@@ -203,13 +220,13 @@ class DatasetTableModel(QAbstractTableModel):
     def flags(self, index: "QModelIndex") -> int:
         general_flags = super().flags(index)
 
-        try:
-            if self.__types[index.column()].is_editable:
-                return general_flags | Qt.ItemIsEditable
-        except IndexError:
-            pass
+        # try:
+        #     if self.__types[index.column()].is_editable:
+        #         return general_flags | Qt.ItemIsEditable
+        # except IndexError:
+        #     pass
 
-        return general_flags
+        return general_flags | Qt.ItemIsEditable
 
     def insertRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
         if not self.__dataset:
@@ -217,6 +234,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.beginInsertRows(QModelIndex(), row, row + count - 1)
 
+        # TODO: Continue here, implemet insertRows for the model
+        # self.__dataset.insert(row, x_set, y_set)
         x_set, y_set = self.__dataset.items(
             start=row, end=row + count, role=Dataset.Role.Display
         )
