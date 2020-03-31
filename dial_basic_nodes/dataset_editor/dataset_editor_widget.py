@@ -18,7 +18,10 @@ from .datasets_list import PredefinedDatasetsList
 
 class DatasetEditorWidget(QWidget):
     """
-    Window for all the dataset related operations (Visualization, loading...)
+    The DatasetEditorWidget class provides a window for displaying all the datasets
+    related information:
+        *_Tabs with the Train/Test data
+        * Labels with information about the datasets length, data types, etc.
     """
 
     def __init__(self, train_test_tabs: "TrainTestTabs", parent: "QWidget" = None):
@@ -43,21 +46,47 @@ class DatasetEditorWidget(QWidget):
         # Connections
         self.__dataset_loader_button.clicked.connect(self.__load_predefined_dataset)
 
-        self.__train_test_tabs.train_dataset_changed.connect(self.__update_train_labels)
-        self.__train_test_tabs.test_dataset_changed.connect(self.__update_test_labels)
-        self.__update_train_labels(self.get_train_dataset())
-        self.__update_test_labels(self.get_test_dataset())
+        self.__train_test_tabs.train_dataset_modified.connect(
+            lambda dataset: self.update_train_labels(dataset)
+        )
+        self.__train_test_tabs.test_dataset_modified.connect(
+            lambda dataset: self.update_test_labels(dataset)
+        )
+
+        self.update_train_labels(self.get_train_dataset())
+        self.update_test_labels(self.get_test_dataset())
 
     def get_train_dataset(self) -> "Dataset":
+        """Returns the train dataset."""
         return self.__train_test_tabs.train_dataset()
 
     def get_test_dataset(self) -> "Dataset":
+        """Returns the test dataset."""
         return self.__train_test_tabs.test_dataset()
 
+    def set_train_dataset(self, train: "Dataset"):
+        """Loads a new train dataset."""
+        self.__train_test_tabs.set_train_dataset(train)
+
+    def set_test_dataset(self, test: "Dataset"):
+        self.__train_test_tabs.set_test_dataset(test)
+
+    def update_train_labels(self, train: "Dataset"):
+        """Update all the text labels related to the train dataset."""
+        print("Updating train")
+        self.__train_len_label.setText(str(train.row_count()))
+
+    def update_test_labels(self, test: "Dataset"):
+        """Update all the text labels related to the test dataset."""
+        print("Updating test")
+        self.__test_len_label.setText(str(test.row_count()))
+
     def sizeHint(self) -> "QSize":
+        """Optimal size of the widget."""
         return QSize(500, 300)
 
     def __setup_ui(self):
+        """Widget layout configuration."""
         splitter = QSplitter()
 
         # Set label names
@@ -81,27 +110,20 @@ class DatasetEditorWidget(QWidget):
         self.setLayout(self.__main_layout)
 
     def __load_predefined_dataset(self):
-        datasets_loader_dialog = PredefinedDatasetsList.Dialog()
+        """Pop a dialog for selecting a dataset between the predefined ones.
 
+        The selected dataset will be loaded on this widget.
+        """
+        datasets_loader_dialog = PredefinedDatasetsList.Dialog()
         accepted = datasets_loader_dialog.exec()
 
         if accepted:
             dataset_loader = datasets_loader_dialog.selected_loader()
-
             train, test = dataset_loader.load()
 
-            self.__train_test_tabs.set_train_dataset(train)
-            self.__train_test_tabs.set_test_dataset(test)
-
             self.__dataset_name_label.setText(dataset_loader.name)
-            self.__update_train_labels(train)
-            self.__update_test_labels(test)
-
-    def __update_train_labels(self, dataset):
-        self.__train_len_label.setText(str(dataset.row_count()))
-
-    def __update_test_labels(self, dataset):
-        self.__test_len_label.setText(str(dataset.row_count()))
+            self.set_train_dataset(train)
+            self.set_test_dataset(test)
 
     def __getstate__(self):
         return {

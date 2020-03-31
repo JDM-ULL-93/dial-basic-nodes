@@ -29,9 +29,9 @@ class ParametersForm(QWidget):
         self.__optimizer_combobox = QComboBox()
         self.__optimizer_combobox.addItems(["Adam", "SDG", "RMSprop"])
 
-        self.__batch_size_spinbox = QSpinBox()
-        self.__batch_size_spinbox.setRange(1, 99999999)
-        self.__batch_size_spinbox.setValue(32)
+        # self.__batch_size_spinbox = QSpinBox()
+        # self.__batch_size_spinbox.setRange(1, 99999999)
+        # self.__batch_size_spinbox.setValue(32)
 
         self.__compile_button = QPushButton("Compile model")
 
@@ -42,7 +42,7 @@ class ParametersForm(QWidget):
         self.__main_layout.addRow("Epochs", self.__epoch_spinbox)
         self.__main_layout.addRow("Loss functions", self.__loss_function_combobox)
         self.__main_layout.addRow("Optimizers", self.__optimizer_combobox)
-        self.__main_layout.addRow("Batch Size", self.__batch_size_spinbox)
+        # self.__main_layout.addRow("Batch Size", self.__batch_size_spinbox)
         self.__main_layout.addWidget(self.__compile_button)
 
         self.setLayout(self.__main_layout)
@@ -57,12 +57,16 @@ class ParametersForm(QWidget):
     def loss_function(self) -> str:
         return self.__loss_function_combobox.currentText()
 
+    @property
+    def batch_size(self) -> int:
+        return self.__batch_size_spinbox.value()
+
     def __getstate__(self):
         return {
             "epoch": self.__epoch_spinbox.value(),
             "loss_function": self.__loss_function_combobox.currentText(),
             "optimizer": self.__optimizer_combobox.currentText(),
-            "batch_size": self.__batch_size_spinbox.value(),
+            # "batch_size": self.__batch_size_spinbox.value(),
         }
 
     def __setstate__(self, new_state):
@@ -73,7 +77,7 @@ class ParametersForm(QWidget):
         self.__optimizer_combobox.setCurrentIndex(
             self.__optimizer_combobox.findText(new_state["optimizer"])
         )
-        self.__batch_size_spinbox.setValue(new_state["batch_size"])
+        # self.__batch_size_spinbox.setValue(new_state["batch_size"])
 
     def __reduce__(self):
         return (ParametersForm, (), self.__getstate__())

@@ -16,12 +16,13 @@ if TYPE_CHECKING:
 
 class TrainTestTabs(QTabWidget):
     """
-    Widget for displaying the train/tests list. Each dataset is on its own tab on the
-    widget.
+    The TrainTestTabs class is a container for a pair of train/test datasets. Each
+    dataset is displayed on its own tab, and can be accessed through the `train_dataset`
+    and `test_dataset` methods.
     """
 
-    train_dataset_changed = Signal(Dataset)
-    test_dataset_changed = Signal(Dataset)
+    train_dataset_modified = Signal(Dataset)
+    test_dataset_modified = Signal(Dataset)
 
     def __init__(
         self, datasettable_mv_factory: "DatasetTableMVFactory", parent: "QWidget" = None
@@ -39,29 +40,34 @@ class TrainTestTabs(QTabWidget):
         self.addTab(self.__train_view, "Train")
         self.addTab(self.__test_view, "Test")
 
-        self.__train_model.rowsRemoved.connect(
-            lambda: self.train_dataset_changed.emit(self.train_dataset)
+        self.__train_model.dataset_modified.connect(
+            lambda dataset: self.train_dataset_modified.emit(dataset)
         )
-        self.__test_model.rowsRemoved.connect(
-            lambda: self.test_dataset_changed.emit(self.test_dataset)
+        self.__test_model.dataset_modified.connect(
+            lambda dataset: self.test_dataset_modified.emit(dataset)
         )
 
+        # Load empty datasets by default
         self.set_train_dataset(train_dataset=Dataset())
         self.set_test_dataset(test_dataset=Dataset())
 
     def train_dataset(self) -> "Dataset":
+        """Returns the train dataset."""
         return self.__train_model.dataset
 
     def test_dataset(self) -> "Dataset":
+        """Returns the test dataset."""
         return self.__test_model.dataset
 
     def set_train_dataset(self, train_dataset: "Dataset"):
+        """Sets a new dataset as the train dataset."""
         self.__train_model.load_dataset(train_dataset)
-        self.train_dataset_changed.emit(train_dataset)
+        self.train_dataset_modified.emit(train_dataset)
 
     def set_test_dataset(self, test_dataset: "Dataset"):
+        """Sets a new dataset as the test dataset."""
         self.__test_model.load_dataset(test_dataset)
-        self.test_dataset_changed.emit(test_dataset)
+        self.test_dataset_modified.emit(test_dataset)
 
     def __getstate__(self):
         return {

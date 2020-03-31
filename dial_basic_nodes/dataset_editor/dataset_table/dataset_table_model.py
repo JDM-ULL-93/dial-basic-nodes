@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from dial_core.datasets import Dataset
 from dial_core.datasets.datatype import DataType, DataTypeContainer, Numeric
 from dial_core.utils import log
-from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
 from PySide2.QtGui import QPixmapCache
 
 if TYPE_CHECKING:
@@ -27,6 +27,8 @@ class DatasetTableModel(QAbstractTableModel):
             fetch operation (Default: 100).
     """
 
+    dataset_modified = Signal(Dataset)
+
     TypeRole = Qt.UserRole + 1
 
     class ColumnLabel(IntEnum):
@@ -37,10 +39,9 @@ class DatasetTableModel(QAbstractTableModel):
         super().__init__(parent)
 
         self.__cached_data: List[List[Any]] = [[], []]
-        self.__types: List[Optional[DataType]] = [None, None]
 
-        self.__x_used_types: Dict[str, DataType] = {}
-        self.__y_used_types: Dict[str, DataType] = {}
+        self.__types: List[Optional[DataType]] = [Numeric, Numeric]
+        self.__loaded_types: List[Dict[str, DataType]] = [{}, {}]
 
         self.__dataset: Optional["Dataset"] = None
 
@@ -51,27 +52,31 @@ class DatasetTableModel(QAbstractTableModel):
             self.TypeRole: self.__type_role,
         }
 
+        self.dataChanged.connect(lambda: self.dataset_modified.emit(self.__dataset))
+
     @property
     def dataset(self) -> "Dataset":
+        """Returns the Dataset object this model is representing."""
         return self.__dataset
 
     def load_dataset(self, dataset: "Dataset"):
-        """
-        Load new Dataset data to the model.
-        """
+        """Loads new Dataset data to the model."""
 
         LOGGER.debug("Loading new dataset to DatasetTableModel...")
 
         self.__dataset = dataset
 
         self.__cached_data = [[], []]
-        self.__x_used_types = {}
-        self.__y_used_types = {}
+
+        self.__types = [Numeric, Numeric]
+        self.__loaded_types = [{}, {}]
 
         if self.__dataset:
             self.__types = [dataset.x_type, dataset.y_type]
-            self.__x_used_types[type(dataset.x_type).__name__] = dataset.x_type
-            self.__y_used_types[type(dataset.y_type).__name__] = dataset.y_type
+            self.__loaded_types = [
+                {type(dataset.x_type).__name__: dataset.x_type},
+                {type(dataset.y_type).__name__: dataset.y_type},
+            ]
 
         QPixmapCache.clear()
 
@@ -79,46 +84,55 @@ class DatasetTableModel(QAbstractTableModel):
         self.modelReset.emit()
 
     def set_input_datatype(self, datatype_name):
+        """Changes the datatype used to visalize the data.
+
+        Any Datatype that can be used must be defined on the DataTypeContainer class.
+
+        For example, for an image, we could use ImageArray to display and render the
+        picture, or just a NumericArray to display the inner array representation of the
+        image.
+        """
         try:
-            datatype = self.__x_used_types[datatype_name]
+            datatype = self.__loaded_types[0][datatype_name]
         except KeyError:
             datatype = getattr(DataTypeContainer, datatype_name)()
-            self.__x_used_types[datatype_name] = datatype
+            self.__loaded_types[0][datatype_name] = datatype
 
         self.__types[0] = datatype
         self.__dataset.x_datatype = datatype
         print("Input: Using", self.__types[0])
 
     def set_output_datatype(self, datatype_name):
+        """Changes the datatype used to visalize the data.
+
+        Any Datatype that can be used must be defined on the DataTypeContainer class.
+
+        For example, for an image, we could use ImageArray to display and render the
+        picture, or just a NumericArray to display the inner array representation of the
+        image.
+        """
         try:
-            datatype = self.__y_used_types[datatype_name]
+            datatype = self.__loaded_types[1][datatype_name]
         except KeyError:
             datatype = getattr(DataTypeContainer, datatype_name)()
-            self.__y_used_types[datatype_name] = datatype
+            self.__loaded_types[1][datatype_name] = datatype
 
         self.__types[1] = datatype
         self.__dataset.y_datatype = datatype
         print("Output: Using", self.__types[1])
 
     def rowCount(self, parent=QModelIndex()) -> int:
-        """
-        Return the number of rows.
-        """
-        row_count = len(self.__cached_data[self.ColumnLabel.Input])
-        return row_count
+        """Returns the number of rows."""
+        return len(self.__cached_data[self.ColumnLabel.Input])
 
     def columnCount(self, parent=QModelIndex()) -> int:
-        """
-        Return the number of columns.
-        """
+        """Returns the number of columns."""
         return len(self.ColumnLabel)
 
     def headerData(
         self, section: int, orientation: "Qt.Orientation", role=Qt.DisplayRole
     ):
-        """
-        Return the name of the headers.
-        """
+        """Returns the name of the headers."""
         if role != Qt.DisplayRole:
             return None
 
@@ -136,6 +150,7 @@ class DatasetTableModel(QAbstractTableModel):
         return None
 
     def canFetchMore(self, parent: "QModelIndex") -> bool:
+        """Checks if the model can fetch more data from the Dataset object."""
         if parent.isValid():
             return False
 
@@ -144,7 +159,12 @@ class DatasetTableModel(QAbstractTableModel):
 
         return self.rowCount() < self.__dataset.row_count()
 
-    def fetchMore(self, parent: "QModelIndex"):
+    def fetchMore(self, parent: "QModelIndex") -> bool:
+        """Loads more data from the Dataset object to the `self.__cached_data`
+        variable.
+
+        Returns if the fetch operation was sucessfully performed.
+        """
         if parent.isValid() or not self.__dataset:
             return False
 
@@ -158,66 +178,59 @@ class DatasetTableModel(QAbstractTableModel):
         row = self.rowCount()
         count = items_to_fetch
 
-        self.beginInsertRows(QModelIndex(), row, row + count - 1)
-
-        x_set, y_set = self.__dataset.items(
-            start=row, end=row + count, role=Dataset.Role.Display
-        )
-
-        self.__cached_data[self.ColumnLabel.Input][row:row] = x_set
-        self.__cached_data[self.ColumnLabel.Output][row:row] = y_set
-
-        self.endInsertRows()
-
-        return True
+        return self.insertRows(row, row + count - 1, QModelIndex())
 
     def index(self, row: int, column: int, parent=QModelIndex()):
+        """Creates an index for each row/column cell.
+
+        Column 0 is X, column 1 is Y.
+        """
         if row < 0 or row > self.rowCount():
             return QModelIndex()
 
         try:
             return self.createIndex(row, column, self.__cached_data[column][row])
-
         except IndexError:
             return QModelIndex()
 
     def data(self, index: "QModelIndex", role=Qt.DisplayRole):
-        """
-        Return the corresponding data depending on the specified role.
-        """
+        """Returns the corresponding data depending on the specified role."""
         if not index.isValid():
             return None
 
         try:
             return self.__role_map[role](index.row(), index.column())
-
         except KeyError:
             return None
 
     def setData(
         self, index: "QModelIndex", value: Any, role: int = Qt.EditRole
     ) -> bool:
+        """Changes the data on the cell pointed by `index`."""
         if not index.isValid():
             return False
 
-        # TODO: Modify Dataset too
         if role == Qt.EditRole:
             try:
-                self.__cached_data[index.column()][index.row()] = self.__types[
-                    index.column()
-                ].display(
+                # Processes the `value`_data written by the user. If the value can't be
+                # parsed an inserted to the dataset, a ValueError exception is thrown by
+                # the 'convert_to_expected_format' method
+                processed_value = self.__types[index.column()].display(
                     self.__types[index.column()].convert_to_expected_format(value)
                 )
+                self.__cached_data[index.column()][index.row()] = processed_value
+                # TODO: Modify Dataset too
 
                 self.dataChanged.emit(index, index, (Qt.EditRole))
                 return True
 
             except ValueError:
-                LOGGER.exception("Tried to store an invalid value")
+                LOGGER.exception("Tried to store an invalid value!!")
 
         return False
 
     def flags(self, index: "QModelIndex") -> int:
+        """Returns the flags for each cell."""
         general_flags = super().flags(index)
 
         # try:
@@ -229,13 +242,20 @@ class DatasetTableModel(QAbstractTableModel):
         return general_flags | Qt.ItemIsEditable
 
     def insertRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
+        """Inserts new rows onto the model from the Dataset object.
+
+        Important:
+            This model DOES NOT add new rows to the inner Dataset object. For adding new
+            rows, see the `insert_data` method.
+
+        Returns:
+            If the rows were inserted sucessfully.
+        """
         if not self.__dataset:
             return False
 
         self.beginInsertRows(QModelIndex(), row, row + count - 1)
 
-        # TODO: Continue here, implemet insertRows for the model
-        # self.__dataset.insert(row, x_set, y_set)
         x_set, y_set = self.__dataset.items(
             start=row, end=row + count, role=Dataset.Role.Display
         )
@@ -248,8 +268,14 @@ class DatasetTableModel(QAbstractTableModel):
         return True
 
     def removeRows(self, row: int, count: int, index=QModelIndex()) -> bool:
-        """
-        Remove rows from the dataset. Rows being deleted must be consecutive.
+        """Removes rows from the model.
+
+        Important:
+            This model DOES NOT removes any rows from the inner Dataset object. For
+            removing rows, see the `remove_data` method.
+
+        Returns:
+            If the rows were removed sucessfully.
         """
         if row < 0:
             return False
@@ -261,7 +287,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         del self.__cached_data[self.ColumnLabel.Input][row : row + count]
         del self.__cached_data[self.ColumnLabel.Output][row : row + count]
-        self.__dataset.delete_rows(row, count)  # type: ignore
+        # self.__dataset.delete_rows(row, count)  # type: ignore
 
         self.endRemoveRows()
         LOGGER.debug("Remove rows END")
@@ -269,10 +295,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         return True
 
-    def __display_role(self, row: int, column: int):
-        """
-        Return the text representation of the cell value.
-        """
+    def __display_role(self, row: int, column: int) -> str:
+        """Returns a text representation of each cell value."""
         try:
             return self.__cached_data[column][row]
 
@@ -280,6 +304,7 @@ class DatasetTableModel(QAbstractTableModel):
             return None
 
     def __type_role(self, row: int, column: int):
+        """Returns the datatype associated to the row value."""
         try:
             return self.__types[column]
 

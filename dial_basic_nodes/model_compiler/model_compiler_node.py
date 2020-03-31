@@ -22,8 +22,8 @@ class ModelCompilerNode(Node):
         )
 
         # Ports
-        self.add_input_port("layers", port_type=Dial.KerasLayerListMIME)
         self.add_input_port("dataset", port_type=Dataset)
+        self.add_input_port("layers", port_type=Dial.KerasLayerListMIME)
         self.inputs["dataset"].set_processor_function(self.__layers_modified)
         self.inputs["layers"].set_processor_function(self.__layers_modified)
 

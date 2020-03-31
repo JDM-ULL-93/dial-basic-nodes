@@ -25,24 +25,12 @@ LOGGER = log.get_logger(__name__)
 
 class DatasetTableView(QTableView):
     """
-    View for the Dataset Table model. Leverages all painting to the DatasetImteDelegate
-    class.
+    The DatasetTableView class providers a view for the DatasetTableModel object, and
+    implements some operations for adding and deleting objects to the model.
     """
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
-
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
-
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-
-        self.setItemDelegate(DatasetItemDelegate())
-
-        self.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
-        self.horizontalHeader().customContextMenuRequested.connect(
-            self.__show_header_datatype_selection_menu
-        )
 
         self.__input_datatypes_menu = QMenu(self)
         self.__output_datatypes_menu = QMenu(self)
@@ -50,7 +38,25 @@ class DatasetTableView(QTableView):
         self.__output_datatypes_actions = QActionGroup(self)
         self.__fill_datatypes_menus()
 
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
+
+        self.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.horizontalHeader().customContextMenuRequested.connect(
+            self.__show_header_datatype_selection_menu
+        )
+
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        # _See DatasetItemDelegate to see how items are displayed on the dataset.
+        self.setItemDelegate(DatasetItemDelegate())
+
     def __fill_datatypes_menus(self):
+        """For each datatype defined on DataTypeContainer, add an option on the menu.
+        When clicked, the model datatype will change.
+        """
+
+        # Input actions
         for name in DataTypeContainer.providers.keys():
             action = QAction(name)
             action.triggered.connect(
@@ -60,6 +66,7 @@ class DatasetTableView(QTableView):
             self.__input_datatypes_actions.addAction(action)
             self.__input_datatypes_menu.addAction(action)
 
+        # Ouptut actions
         for name in DataTypeContainer.providers.keys():
             action = QAction(name)
             action.triggered.connect(
@@ -70,14 +77,15 @@ class DatasetTableView(QTableView):
             self.__output_datatypes_menu.addAction(action)
 
     def contextMenuEvent(self, event: "QContextMenuEvent"):
-        """Show a context menu for modifying dataset entries."""
+        """Shows a context menu with the operations for modifying the dataset rows."""
         menu = QMenu(parent=self)
 
         menu.popup(event.globalPos())
         menu.addAction("Remove rows", lambda: self.deleteSelectedRows())
-        menu.addAction("Insert row", lambda: self.insertRow())
+        # menu.addAction("Insert row", lambda: self.insertRow())
 
     def deleteSelectedRows(self):
+        """Deletes the rows that are selected on the view from the model."""
         # When a row is deleted, the new row index is the last row index - 1
         # That's why we have an i variable on this loop, which represents the amount of
         # rows that have been deleted
@@ -113,6 +121,7 @@ class DatasetTableView(QTableView):
         self.clearSelection()
 
     def __show_header_datatype_selection_menu(self, point: "QPoint"):
+        """Displays the menu used for picking a new datatype."""
         if point.x() < self.horizontalHeader().length() / 2:
             self.__input_datatypes_menu.popup(
                 self.horizontalHeader().mapToGlobal(point)

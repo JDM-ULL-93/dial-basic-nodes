@@ -48,14 +48,14 @@ class ModelCompilerWidget(QWidget):
             for layer in layers:
                 self.__model.add(layer)
 
-                self.__model.summary(print_fn=LOGGER.info)
+            self.__model.summary(print_fn=LOGGER.info)
 
-                self.__model.compile(
-                    optimizer=self.__parameters_form.optimizer,
-                    loss=self.__parameters_form.loss_function,
-                    metrics=["accuracy"],
-                )
-                print("Model compiled")
+            self.__model.compile(
+                optimizer=self.__parameters_form.optimizer,
+                loss=self.__parameters_form.loss_function,
+                metrics=["accuracy"],
+            )
+            self.__compilation_output_textbox.setPlainText("Model compiled!")
         except Exception as err:
             print(err)
             self.__compilation_output_textbox.setPlainText(str(err))

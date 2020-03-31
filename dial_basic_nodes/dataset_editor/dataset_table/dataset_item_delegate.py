@@ -4,11 +4,10 @@
 from typing import TYPE_CHECKING
 
 import qimage2ndarray
+from dial_core.datasets import datatype
 from PySide2.QtCore import QRect, QSize, Qt
 from PySide2.QtGui import QPixmap, QPixmapCache
 from PySide2.QtWidgets import QStyledItemDelegate
-
-from dial_core.datasets import datatype
 
 from .dataset_table_model import DatasetTableModel
 
@@ -21,7 +20,8 @@ if TYPE_CHECKING:
 
 class DatasetItemDelegate(QStyledItemDelegate):
     """
-    Delegate that knows how to paint any data that can be loaded to a dataset.
+    The DatasetItemDelegate class provides an implemententaion for correctly painting
+    data form the Dataset depending on the datatype.
     """
 
     def __init__(self, parent: "QObject" = None):
@@ -32,17 +32,15 @@ class DatasetItemDelegate(QStyledItemDelegate):
     def paint(
         self, painter: "QPainter", option: "QStyleOptionViewItem", index: "QModelIndex"
     ):
-        """
-        Paint the element according to its type.
-        """
+        """Pains the element acording to its datatype."""
         if not index.isValid():
-            return None
+            return
 
         raw_data = index.data(Qt.DisplayRole)
         data_type = index.data(DatasetTableModel.TypeRole)
 
-        # Draw image
         try:
+            # _Draw imagearrays as an image
             if isinstance(data_type, datatype.ImageArray):
                 self.__paint_pixmap(raw_data, painter, option, index)
 
@@ -59,11 +57,10 @@ class DatasetItemDelegate(QStyledItemDelegate):
         option: "QStyleOptionViewItem",
         index: "QModelIndex",
     ):
-        """
-        Paint a pixmap centered on the cell.
+        """Paints a pixmap centered on the cell.
+
         Generated pixmaps are saved on cache by the name "dataset_row_col"
         """
-
         # Load Qt pixap from array
         pix = QPixmap()
         pix_name = str(id(raw_data))
@@ -94,9 +91,7 @@ class DatasetItemDelegate(QStyledItemDelegate):
         option: "QStyleOptionViewItem",
         index: "QModelIndex",
     ):
-        """
-        Paint a value that can be converted to string.
-        """
+        """Paints a value that can be converted to string."""
         alignment = Qt.AlignCenter
 
         # Align arrays to left
@@ -107,8 +102,5 @@ class DatasetItemDelegate(QStyledItemDelegate):
         painter.drawText(option.rect, alignment, str(raw_data))
 
     def sizeHint(self, option: "QStyleOptionViewItem", index: "QModelIndex"):
-        """
-        Return the size needed by the delegate to display its contents.
-        """
-
+        """Returns the size needed by the delegate to display its contents."""
         return self.min_image_size
