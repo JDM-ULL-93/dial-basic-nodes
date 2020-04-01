@@ -2,7 +2,7 @@
 
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
-from PySide2.QtCore import QSize
+from PySide2.QtCore import QSize, Signal
 from PySide2.QtWidgets import (
     QFormLayout,
     QGridLayout,
@@ -15,6 +15,10 @@ from PySide2.QtWidgets import (
 from .dataset_table import TrainTestTabs, TrainTestTabsFactory
 from .datasets_list import PredefinedDatasetsList
 
+from dial_core.utils import log
+
+LOGGER = log.get_logger(__name__)
+
 
 class DatasetEditorWidget(QWidget):
     """
@@ -23,6 +27,8 @@ class DatasetEditorWidget(QWidget):
         *_Tabs with the Train/Test data
         * Labels with information about the datasets length, data types, etc.
     """
+    train_dataset_modified = Signal(Dataset)
+    test_dataset_modified = Signal(Dataset)
 
     def __init__(self, train_test_tabs: "TrainTestTabs", parent: "QWidget" = None):
         super().__init__(parent)
@@ -73,13 +79,17 @@ class DatasetEditorWidget(QWidget):
 
     def update_train_labels(self, train: "Dataset"):
         """Update all the text labels related to the train dataset."""
-        print("Updating train")
+        LOGGER.info(f"Train dataset updated: {train}")
         self.__train_len_label.setText(str(train.row_count()))
+
+        self.train_dataset_modified.emit(train)
 
     def update_test_labels(self, test: "Dataset"):
         """Update all the text labels related to the test dataset."""
-        print("Updating test")
+        LOGGER.info(f"Test dataset updated: {test}")
         self.__test_len_label.setText(str(test.row_count()))
+
+        self.test_dataset_modified.emit(test)
 
     def sizeHint(self) -> "QSize":
         """Optimal size of the widget."""

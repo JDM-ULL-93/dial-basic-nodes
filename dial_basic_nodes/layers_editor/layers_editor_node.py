@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING, List
 from copy import deepcopy
+from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
 from dial_core.node_editor import Node
@@ -28,12 +28,7 @@ class LayersEditorNode(Node, QObject):
         self.add_output_port(name="layers", port_type=Dial.KerasLayerListMIME)
         self.outputs["layers"].set_generator_function(self.get_layers)
 
-        def triggered():
-            print("Layers changed", self.get_layers())
-
-            self.outputs["layers"].send()
-
-        self.inner_widget.layers_modified.connect(triggered)
+        self.inner_widget.layers_modified.connect(lambda: self.outputs["layers"].send())
 
     def get_layers(self):
         return deepcopy(self.inner_widget.layers)

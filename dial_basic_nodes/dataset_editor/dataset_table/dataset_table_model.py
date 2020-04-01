@@ -40,7 +40,7 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.__cached_data: List[List[Any]] = [[], []]
 
-        self.__types: List[Optional[DataType]] = [Numeric, Numeric]
+        self.__types: List[Optional[DataType]] = [Numeric(), Numeric()]
         self.__loaded_types: List[Dict[str, DataType]] = [{}, {}]
 
         self.__dataset: Optional["Dataset"] = None

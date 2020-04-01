@@ -10,7 +10,9 @@ class ParametersForm(QWidget):
     Form for changing the parameters used for the training process.
     """
 
-    compile_model = Signal()
+    loss_function_changed = Signal(str)
+    optimizer_changed = Signal(str)
+    compilation_triggered = Signal()
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
@@ -47,7 +49,13 @@ class ParametersForm(QWidget):
 
         self.setLayout(self.__main_layout)
 
-        self.__compile_button.clicked.connect(lambda: self.compile_model.emit())
+        self.__loss_function_combobox.currentTextChanged.connect(
+            lambda value: self.loss_function_changed.emit(value)
+        )
+        self.__optimizer_combobox.currentTextChanged.connect(
+            lambda value: self.optimizer_changed.emit(value)
+        )
+        self.__compile_button.clicked.connect(lambda: self.compilation_triggered.emit())
 
     @property
     def optimizer(self) -> str:
