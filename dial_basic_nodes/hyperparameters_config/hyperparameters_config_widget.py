@@ -15,11 +15,30 @@ class HyperparametersConfigWidget(QWidget):
 
         self.__loss_function_combobox = QComboBox(parent=self)
         self.__loss_function_combobox.addItems(
-            ["mean_squared_error", "binary_crossentropy", "categorical_crossentropy"]
+            [
+                "mean_squared_error",
+                "mean_absolute_error",
+                "mean_absolute_percentage_error",
+                "mean_square_logarithmic_error",
+                "squared_hinge",
+                "hinge",
+                "categorical_hinge",
+                "logcosh",
+                "huber_loss",
+                "categorical_crossentropy",
+                "sparse_categorical_crossentropy",
+                "binary_crossentropy",
+                "kullback_leibler_divergence",
+                "poisson",
+                "cosine_proximity",
+                "is_categorical_crossentropy",
+            ]
         )
 
         self.__optimizer_combobox = QComboBox()
-        self.__optimizer_combobox.addItems(["Adam", "SGD", "RMSprop"])
+        self.__optimizer_combobox.addItems(
+            ["SGD", "RMSprop", "Adagrad", "Adadelta", "Adam", "Adamax", "Nadam"]
+        )
 
         # Layouts
         self.__main_layout = QFormLayout()
@@ -35,8 +54,25 @@ class HyperparametersConfigWidget(QWidget):
             "optimizer": self.__optimizer_combobox.currentText(),
         }
 
+        self.__epoch_spinbox.valueChanged.connect(self.set_epochs)
+        self.__loss_function_combobox.currentTextChanged.connect(self.set_loss_function)
+
     def get_hyperparameters(self):
         return self.__hyperparameters
+
+    def get_epochs(self):
+        return self.__hyperparameters["epochs"]
+
+    def set_epochs(self, new_epoch: int):
+        self.__hyperparameters["epochs"] = new_epoch
+        self.__epoch_spinbox.setValue(new_epoch)
+
+    def get_loss_function(self):
+        return self.__hyperparameters["loss_function"]
+
+    def set_loss_function(self, new_loss_function: str):
+        self.__hyperparameters["loss_function"] = new_loss_function
+        self.__loss_function_combobox.setCurrentText(new_loss_function)
 
     def sizeHint(self) -> "QSize":
         return QSize(350, 200)
