@@ -25,19 +25,19 @@ class DatasetEditorNode(Node, QObject):
         )
         QObject.__init__(self, parent)
 
-        self.add_output_port(name="train", port_type=Dataset)
-        self.add_output_port(name="test", port_type=Dataset)
+        self.add_output_port(name="Train", port_type=Dataset)
+        self.add_output_port(name="Test", port_type=Dataset)
 
-        self.outputs["train"].set_generator_function(
+        self.outputs["Train"].set_generator_function(
             self.inner_widget.get_train_dataset
         )
-        self.outputs["test"].set_generator_function(self.inner_widget.get_test_dataset)
+        self.outputs["Test"].set_generator_function(self.inner_widget.get_test_dataset)
 
         self.inner_widget.train_dataset_modified.connect(
-            lambda: self.outputs["train"].send()
+            lambda: self.outputs["Train"].send()
         )
         self.inner_widget.test_dataset_modified.connect(
-            lambda: self.outputs["test"].send()
+            lambda: self.outputs["Test"].send()
         )
 
     def __reduce__(self):

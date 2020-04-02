@@ -1,10 +1,12 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING, List
+from copy import deepcopy
+from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
 from PySide2.QtCore import QSize, Qt, Signal
 from PySide2.QtWidgets import QDockWidget, QMainWindow
+from tensorflow.keras.models import Sequential
 
 from .layers_tree import LayersTreeWidgetFactory
 from .model_table import ModelTableWidgetFactory
@@ -20,7 +22,7 @@ class LayersEditorWidget(QMainWindow):
     Window for all the model related operations (Create/Modify NN architectures)
     """
 
-    layers_modified = Signal(object)
+    layers_modified = Signal()
 
     def __init__(
         self,
@@ -42,13 +44,15 @@ class LayersEditorWidget(QMainWindow):
         # Configure interface
         self.__setup_ui()
 
-        self.__model_table.layers_modified.connect(
-            lambda layers: self.layers_modified.emit(layers)
-        )
+        self.__model_table.layers_modified.connect(lambda: self.layers_modified.emit())
 
-    @property
-    def layers(self):
-        return self.__model_table.layers
+    def get_model(self):
+        model = Sequential()
+
+        for layer in self.__model_table.layers:
+            model.add(layer)
+
+        return deepcopy(model)
 
     def sizeHint(self) -> "QSize":
         return QSize(600, 300)

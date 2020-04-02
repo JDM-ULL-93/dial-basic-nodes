@@ -52,8 +52,6 @@ class DatasetTableModel(QAbstractTableModel):
             self.TypeRole: self.__type_role,
         }
 
-        self.dataChanged.connect(lambda: self.dataset_modified.emit(self.__dataset))
-
     @property
     def dataset(self) -> "Dataset":
         """Returns the Dataset object this model is representing."""
@@ -82,6 +80,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         # Model has been reset, redraw view
         self.modelReset.emit()
+
+        self.dataset_modified.emit(self.__dataset)
 
     def set_input_datatype(self, datatype_name):
         """Changes the datatype used to visalize the data.

@@ -1,12 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
 from dial_core.node_editor import Node
-from dial_core.utils import Dial
 from PySide2.QtCore import QObject, Signal
+from tensorflow.keras.models import Model
 
 from .layers_editor_widget import LayersEditorWidgetFactory
 
@@ -25,13 +24,10 @@ class LayersEditorNode(Node, QObject):
             self, title="Layers Editor Node", inner_widget=layers_editor_widget
         )
 
-        self.add_output_port(name="layers", port_type=Dial.KerasLayerListMIME)
-        self.outputs["layers"].set_generator_function(self.get_layers)
+        self.add_output_port(name="Model", port_type=Model)
+        self.outputs["Model"].set_generator_function(self.inner_widget.get_model)
 
-        self.inner_widget.layers_modified.connect(lambda: self.outputs["layers"].send())
-
-    def get_layers(self):
-        return deepcopy(self.inner_widget.layers)
+        self.inner_widget.layers_modified.connect(lambda: self.outputs["Model"].send())
 
     def __reduce__(self):
         return (LayersEditorNode, (self.inner_widget,), super().__getstate__())

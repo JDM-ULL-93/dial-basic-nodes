@@ -2,6 +2,7 @@
 
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
+from dial_core.utils import log
 from PySide2.QtCore import QSize, Signal
 from PySide2.QtWidgets import (
     QFormLayout,
@@ -15,8 +16,6 @@ from PySide2.QtWidgets import (
 from .dataset_table import TrainTestTabs, TrainTestTabsFactory
 from .datasets_list import PredefinedDatasetsList
 
-from dial_core.utils import log
-
 LOGGER = log.get_logger(__name__)
 
 
@@ -27,6 +26,7 @@ class DatasetEditorWidget(QWidget):
         *_Tabs with the Train/Test data
         * Labels with information about the datasets length, data types, etc.
     """
+
     train_dataset_modified = Signal(Dataset)
     test_dataset_modified = Signal(Dataset)
 
