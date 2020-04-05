@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dial-basic-nodes"
-version = "0.3a0"
+version = "0.4a0"
 description = "Basic nodes for the Dial app."
 authors = ["David Afonso <davafons@gmail.com>"]
 
@@ -16,8 +16,8 @@ keywords = ["deep-learning", "dial-app"]
 [tool.poetry.dependencies]
 python = ">=3.6,<3.8"
 
-dial-core = "^0.9a2"
-dial-gui = "^0.6a0"
+dial-core = "v0.12a0"
+dial-gui = "v0.8a0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.1"

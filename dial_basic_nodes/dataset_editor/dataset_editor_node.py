@@ -13,17 +13,28 @@ if TYPE_CHECKING:
 
 
 class DatasetEditorNode(Node):
+    """The DatasetEditorNode class provides a node capable of load, visualize and modify
+        Dataset objects through an interface."""
+
     def __init__(self, dataset_editor_widget: "DatasetEditorWidget"):
         super().__init__(
             title="Dataset Editor Node", inner_widget=dataset_editor_widget
         )
 
-        # Ports
-        self.add_output_port(name="train", port_type=Dataset)
-        self.add_output_port(name="test", port_type=Dataset)
+        self.add_output_port(name="Train", port_type=Dataset)
+        self.add_output_port(name="Test", port_type=Dataset)
 
-        self.outputs["train"].output_generator = self.inner_widget.train_dataset
-        self.outputs["test"].output_generator = self.inner_widget.test_dataset
+        self.outputs["Train"].set_generator_function(
+            self.inner_widget.get_train_dataset
+        )
+        self.outputs["Test"].set_generator_function(self.inner_widget.get_test_dataset)
+
+        self.inner_widget.train_dataset_modified.connect(
+            lambda: self.outputs["Train"].send()
+        )
+        self.inner_widget.test_dataset_modified.connect(
+            lambda: self.outputs["Test"].send()
+        )
 
     def __reduce__(self):
         return (DatasetEditorNode, (self.inner_widget,), super().__getstate__())
