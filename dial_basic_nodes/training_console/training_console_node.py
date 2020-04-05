@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
 from dial_core.node_editor import Node
-from PySide2.QtCore import QObject
 from tensorflow.keras import Model
 
 from .training_console_widget import TrainingConsoleWidgetFactory
@@ -14,14 +13,9 @@ if TYPE_CHECKING:
     from .training_console_widget import TrainingConsoleWidget
 
 
-class TrainingConsoleNode(Node, QObject):
-    def __init__(
-        self, training_console_widget: "TrainingConsoleWidget", parent: "QObject" = None
-    ):
-        QObject.__init__(self, parent)
-        Node.__init__(
-            self, title="Training Console", inner_widget=training_console_widget
-        )
+class TrainingConsoleNode(Node):
+    def __init__(self, training_console_widget: "TrainingConsoleWidget"):
+        super().__init__(title="Training Console", inner_widget=training_console_widget)
 
         self.add_input_port("Train", port_type=Dataset)
         self.add_input_port("Validation", port_type=Dataset)

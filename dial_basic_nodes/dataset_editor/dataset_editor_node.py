@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
 from dial_core.node_editor import Node
-from PySide2.QtCore import QObject
 
 from .dataset_editor_widget import DatasetEditorWidgetFactory
 
@@ -13,17 +12,14 @@ if TYPE_CHECKING:
     from .dataset_editor_widget import DatasetEditorWidget
 
 
-class DatasetEditorNode(Node, QObject):
+class DatasetEditorNode(Node):
     """The DatasetEditorNode class provides a node capable of load, visualize and modify
         Dataset objects through an interface."""
 
-    def __init__(
-        self, dataset_editor_widget: "DatasetEditorWidget", parent: "QObject" = None
-    ):
-        Node.__init__(
-            self, title="Dataset Editor Node", inner_widget=dataset_editor_widget
+    def __init__(self, dataset_editor_widget: "DatasetEditorWidget"):
+        super().__init__(
+            title="Dataset Editor Node", inner_widget=dataset_editor_widget
         )
-        QObject.__init__(self, parent)
 
         self.add_output_port(name="Train", port_type=Dataset)
         self.add_output_port(name="Test", port_type=Dataset)
