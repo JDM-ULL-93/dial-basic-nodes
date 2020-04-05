@@ -19,8 +19,8 @@ class HyperparametersConfigNode(Node):
             title="Hyperparameters Config", inner_widget=hyperparameters_config_widget,
         )
 
-        self.add_output_port("hyperparameters", port_type=dict)
-        self.outputs["hyperparameters"].set_generator_function(
+        self.add_output_port("Hyperparameters", port_type=dict)
+        self.outputs["Hyperparameters"].set_generator_function(
             self.inner_widget.get_hyperparameters
         )
 

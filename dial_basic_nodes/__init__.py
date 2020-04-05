@@ -14,6 +14,7 @@ from .hyperparameters_config import (
     HyperparametersConfigNodeFactory,
 )
 from .layers_editor import LayersEditorNode, LayersEditorNodeFactory
+from .test_model import TestModelNode, TestModelNodeFactory
 from .training_console import TrainingConsoleNode, TrainingConsoleNodeFactory
 
 
@@ -26,6 +27,7 @@ def load_plugin():
         "Hyperparameters Config", HyperparametersConfigNodeFactory
     )
     node_registry.register_node("Training Console", TrainingConsoleNodeFactory)
+    node_registry.register_node("Test Model", TestModelNodeFactory)
 
 
 def unload_plugin():
@@ -35,6 +37,7 @@ def unload_plugin():
     node_registry.unregister_node("Layers Editor")
     node_registry.unregister_node("Hyperparameters Config")
     node_registry.unregister_node("Training Console")
+    node_registry.unregister_node("Test Model")
 
 
 __all__ = [
@@ -44,10 +47,10 @@ __all__ = [
     "DatasetEditorNodeFactory",
     "LayersEditorNode",
     "LayersEditorNodeFactory",
-    "ModelCompilerNode",
-    "ModelCompilerNodeFactory",
     "TrainingConsoleNode",
     "TrainingConsoleNodeFactory",
     "HyperparametersConfigNode",
     "HyperparametersConfigNodeFactory",
+    "TestModelNode",
+    "TestModelNodeFactory",
 ]
