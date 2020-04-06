@@ -29,10 +29,10 @@ class DatasetEditorNode(Node):
         )
         self.outputs["Test"].set_generator_function(self.inner_widget.get_test_dataset)
 
-        self.inner_widget.train_dataset_modified.connect(
+        self.inner_widget.train_dataset_loaded.connect(
             lambda: self.outputs["Train"].send()
         )
-        self.inner_widget.test_dataset_modified.connect(
+        self.inner_widget.test_dataset_loaded.connect(
             lambda: self.outputs["Test"].send()
         )
 

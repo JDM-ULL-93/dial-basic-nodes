@@ -21,8 +21,8 @@ class TrainTestTabs(QTabWidget):
     and `test_dataset` methods.
     """
 
-    train_dataset_modified = Signal(Dataset)
-    test_dataset_modified = Signal(Dataset)
+    train_dataset_loaded = Signal(Dataset)
+    test_dataset_loaded = Signal(Dataset)
 
     def __init__(
         self,
@@ -39,11 +39,11 @@ class TrainTestTabs(QTabWidget):
 
         self._dataset_table_widget_factory = dataset_table_widget_factory
 
-        self._train_table_widget.dataset_modified.connect(
-            lambda dataset: self.train_dataset_modified.emit(dataset)
+        self._train_table_widget.dataset_loaded.connect(
+            lambda dataset: self.train_dataset_loaded.emit(dataset)
         )
-        self._train_table_widget.dataset_modified.connect(
-            lambda dataset: self.test_dataset_modified.emit(dataset)
+        self._train_table_widget.dataset_loaded.connect(
+            lambda dataset: self.test_dataset_loaded.emit(dataset)
         )
 
     def train_dataset(self) -> "Dataset":

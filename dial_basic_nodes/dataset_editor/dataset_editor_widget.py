@@ -27,8 +27,8 @@ class DatasetEditorWidget(QWidget):
         * Labels with information about the datasets length, data types, etc.
     """
 
-    train_dataset_modified = Signal(Dataset)
-    test_dataset_modified = Signal(Dataset)
+    train_dataset_loaded = Signal(Dataset)
+    test_dataset_loaded = Signal(Dataset)
 
     def __init__(self, train_test_tabs: "TrainTestTabs", parent: "QWidget" = None):
         super().__init__(parent)
@@ -52,11 +52,18 @@ class DatasetEditorWidget(QWidget):
         # Connections
         self.__dataset_loader_button.clicked.connect(self.__load_predefined_dataset)
 
-        self.__train_test_tabs.train_dataset_modified.connect(
+        self.__train_test_tabs.train_dataset_loaded.connect(
             lambda dataset: self.update_train_labels(dataset)
         )
-        self.__train_test_tabs.test_dataset_modified.connect(
+        self.__train_test_tabs.test_dataset_loaded.connect(
             lambda dataset: self.update_test_labels(dataset)
+        )
+
+        self.__train_test_tabs.train_dataset_loaded.connect(
+            lambda dataset: self.train_dataset_loaded.emit(dataset)
+        )
+        self.__train_test_tabs.test_dataset_loaded.connect(
+            lambda dataset: self.test_dataset_loaded.emit(dataset)
         )
 
         self.update_train_labels(self.get_train_dataset())
@@ -82,14 +89,10 @@ class DatasetEditorWidget(QWidget):
         LOGGER.info(f"Train dataset updated: {train}")
         self.__train_len_label.setText(str(train.row_count()))
 
-        self.train_dataset_modified.emit(train)
-
     def update_test_labels(self, test: "Dataset"):
         """Update all the text labels related to the test dataset."""
         LOGGER.info(f"Test dataset updated: {test}")
         self.__test_len_label.setText(str(test.row_count()))
-
-        self.test_dataset_modified.emit(test)
 
     def sizeHint(self) -> "QSize":
         """Optimal size of the widget."""

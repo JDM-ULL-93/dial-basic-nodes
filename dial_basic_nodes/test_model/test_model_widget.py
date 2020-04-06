@@ -23,7 +23,6 @@ class TestModelWidget(QWidget):
         super().__init__(parent)
 
         # Componentes
-        self.__test_dataset: Optional["Dataset"] = None
         self.__compiled_model: Optional["keras.models.Model"] = None
 
         # Widgets
@@ -37,7 +36,7 @@ class TestModelWidget(QWidget):
 
     def set_test_dataset(self, test_dataset: "Dataset"):
         print("Set test dataset")
-        self.__test_dataset = test_dataset
+        self.__test_dataset_widget.load_dataset(test_dataset)
 
         self.predict_values()
 
@@ -48,7 +47,7 @@ class TestModelWidget(QWidget):
         self.predict_values()
 
     def predict_values(self):
-        if self.__test_dataset is None or self.__compiled_model is None:
+        if self.__test_dataset_widget.dataset is None or self.__compiled_model is None:
             return
 
         # X = self.__compiled_model.predict(self.__test_dataset)

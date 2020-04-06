@@ -8,7 +8,7 @@ import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
 from dial_core.datasets.datatype import DataType
 from dial_core.utils import log
-from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide2.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
 from PySide2.QtGui import QPixmapCache
 
 if TYPE_CHECKING:
@@ -20,6 +20,8 @@ LOGGER = log.get_logger(__name__)
 
 class DatasetTableModel(QAbstractTableModel):
     TypeRole = Qt.UserRole + 1
+
+    dataset_loaded = Signal(Dataset)
 
     class ColumnLabel(IntEnum):
         Input = 0
@@ -77,6 +79,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         # Sends a signal that the model has been reset
         self.modelReset.emit()
+
+        self.dataset_loaded.emit(self._dataset)
 
     def rowCount(self, parent=QModelIndex()) -> int:
         """Returns the number of rows on the dataset."""

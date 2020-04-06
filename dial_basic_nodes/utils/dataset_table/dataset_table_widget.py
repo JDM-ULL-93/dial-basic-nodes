@@ -16,8 +16,7 @@ if TYPE_CHECKING:
 
 
 class DatasetTableWidget(QWidget):
-    dataset_modified = Signal(Dataset)
-    # TODO: Connect this signal
+    dataset_loaded = Signal(Dataset)
 
     def __init__(
         self,
@@ -27,16 +26,23 @@ class DatasetTableWidget(QWidget):
     ):
         super().__init__(parent)
 
+        # Componentes
         self._dataset_table_model = model
         self._dataset_table_view = view
         self._dataset_table_view.setModel(self._dataset_table_model)
 
+        # Widgets
         self._main_layout = QVBoxLayout()
         self._main_layout.setContentsMargins(0, 0, 0, 0)
 
         self._main_layout.addWidget(self._dataset_table_view)
 
         self.setLayout(self._main_layout)
+
+        # Connections
+        self._dataset_table_model.dataset_loaded.connect(
+            lambda dataset: self.dataset_loaded.emit(dataset)
+        )
 
     @property
     def dataset(self):
