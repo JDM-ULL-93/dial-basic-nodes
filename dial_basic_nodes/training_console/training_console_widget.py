@@ -1,14 +1,18 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 from enum import Enum
+from typing import Dict, Optional
 
 import dependency_injector.providers as providers
+from dial_core.datasets import Dataset
 from dial_core.utils import log
 from PySide2.QtCore import QObject, QSize, QThread, Signal
 from PySide2.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
+    QLabel,
     QPlainTextEdit,
+    QProgressBar,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -21,21 +25,23 @@ LOGGER = log.get_logger(__name__)
 
 
 class SignalsCallback(keras.callbacks.Callback, QObject):
-    train_batch_end = Signal()
+    train_batch_end = Signal(int)
     train_end = Signal()
 
-    def __init__(self):
+    def __init__(self, batches_between_updates: int = 100):
         keras.callbacks.Callback.__init__(self)
         QObject.__init__(self)
 
+        self.batches_between_updates = batches_between_updates
+
     def on_train_batch_end(self, batch, logs=None):
-        self.train_batch_end.emit()
+        if batch % self.batches_between_updates == 0:
+            self.train_batch_end.emit(batch)
 
     def on_train_end(self, logs=None):
         self.train_end.emit()
 
     def stop_model(self):
-        print("Stopping model")
         self.model.stop_training = True
 
 
@@ -57,24 +63,45 @@ class FitWorker(QThread):
 
 
 class TrainingConsoleWidget(QWidget):
+    """The TrainingConsoleWidget provides a widget for controlling the training status
+    of a model, in a simple way. (Analog of the console output in Keras, but with a few
+    more options).
+
+    It also can save and show an history of the last trained models.
+    """
+
     start_training_triggered = Signal()
     stop_training_triggered = Signal()
 
     class TrainingStatus(Enum):
         Running = 1
         Stopped = 2
+        Not_Compiled = 3
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 
-        self.__start_training_button = QPushButton("Start training", parent=self)
-        self.__stop_training_button = QPushButton("Stop training", parent=self)
+        # Components
+        self.__pretrained_model: Optional["keras.models.Model"] = None
+        self.__train_dataset: Optional["Dataset"] = None
+        self.__validation_dataset: Optional["Dataset"] = None
+        self.__hyperparameters: Optional[Dict] = None
+
+        self.__trained_model: Optional["keras.models.Model"] = None
+
+        # Widgets
+        self.__start_training_button = QPushButton("Start training")
+        self.__stop_training_button = QPushButton("Stop training")
 
         self.__buttons_layout = QHBoxLayout()
         self.__buttons_layout.addWidget(self.__start_training_button)
         self.__buttons_layout.addWidget(self.__stop_training_button)
 
-        self.training_output_textbox = QPlainTextEdit(parent=self)
+        self.__status_label = QLabel()
+
+        self.__training_progress_bar = QProgressBar()
+
+        self.training_output_textbox = QPlainTextEdit()
         self.training_output_textbox.setReadOnly(True)
 
         console_output_group = QGroupBox("Console output")
@@ -85,91 +112,175 @@ class TrainingConsoleWidget(QWidget):
 
         self.__main_layout = QVBoxLayout()
         self.__main_layout.addLayout(self.__buttons_layout)
+        self.__main_layout.addWidget(self.__status_label)
         self.__main_layout.addWidget(console_output_group)
+        self.__main_layout.addWidget(self.__training_progress_bar)
         self.setLayout(self.__main_layout)
 
-        self.__start_training_button.clicked.connect(
-            lambda: self.start_training_triggered.emit()
-        )
+        # Connections
+        self.__start_training_button.clicked.connect(self.start_training)
+        self.__stop_training_button.clicked.connect(self.stop_training)
 
-        self.__stop_training_button.clicked.connect(
-            lambda: self.stop_training_triggered.emit()
-        )
-
-        self.training_status = self.TrainingStatus.Stopped
-
+        # Inner workings
+        self.training_status = self.TrainingStatus.Not_Compiled
         self.__training_thread = None
-
-        self.__trained_model = None
 
     @property
     def training_status(self):
+        """Returns the current status of the training (Running, Stopped...)"""
         return self.__training_status
 
     @training_status.setter
     def training_status(self, new_status):
+        """Changes the training status.
+
+        Doing so will update the interface accordingly.
+        """
         self.__training_status = new_status
 
         if self.__training_status == self.TrainingStatus.Running:
             self.__start_training_button.setEnabled(False)
             self.__stop_training_button.setEnabled(True)
+            self.__status_label.setText("Running")
 
         elif self.__training_status == self.TrainingStatus.Stopped:
             self.__start_training_button.setEnabled(True)
             self.__stop_training_button.setEnabled(False)
+            self.__status_label.setText("Stopped")
+
+        elif self.__train_dataset == self.TrainingStatus.Not_Compiled:
+            self.__start_training_button.setEnabled(True)
+            self.__stop_training_button.setEnabled(False)
+            self.__status_label.setText("Not Compiled")
+
+    def set_train_dataset(self, train_dataset: "Dataset"):
+        """Sets a new training dataset."""
+        self.__train_dataset = train_dataset
+
+        self.training_status = self.TrainingStatus.Not_Compiled
+
+    def set_validation_dataset(self, validation_dataset: "Dataset"):
+        """Sets a new validation dataset."""
+        self.__validation_dataset = validation_dataset
+
+    def set_pretrained_model(self, pretrained_model: "Model"):
+        """Sets a new pretrained model for training."""
+        self.__pretrained_model = pretrained_model
+
+        self.training_status = self.TrainingStatus.Not_Compiled
+
+    def set_hyperparameters(self, hyperparameters: Dict):
+        """Sets new hyperparameters for training."""
+        self.__hyperparameters = hyperparameters
+
+        self.training_status = self.TrainingStatus.Not_Compiled
 
     def get_trained_model(self):
+        """Returns the model after it has been trained."""
         return self.__trained_model
 
-    def compile_model(self, hyperparameters, model, train_dataset):
-        LOGGER.debug("Compiling model")
+    def compile_model(self):
+        """Compile the model with the passed hyperparameters. The dataset is needed for
+        the input shape."""
+        LOGGER.info("Starting to compile the model...")
 
-        input_layer = Input(train_dataset.input_shape)
-        output = model(input_layer)
+        if not self.__is_input_ready():
+            return False
+
+        # Create a new model based on the pretrained one, but with a new InputLayer
+        # compatible with the dataset
+        input_layer = Input(self.__train_dataset.input_shape)
+        output = self.__pretrained_model(input_layer)
 
         self.__trained_model = Model(input_layer, output)
 
-        print(train_dataset.input_shape)
-
         try:
             self.__trained_model.compile(
-                optimizer=hyperparameters["optimizer"],
-                loss=hyperparameters["loss_function"],
+                optimizer=self.__hyperparameters["optimizer"],
+                loss=self.__hyperparameters["loss_function"],
                 metrics=["accuracy"],
             )
+
+            self.__trained_model.summary()
+
+            LOGGER.info("Model compiled successfully!!")
+
+            self.training_status = self.TrainingStatus.Stopped
+
+            return True
+
         except Exception as err:
             LOGGER.exception("Model Compiling error: ", err)
+
             self.training_output_textbox.setPlainText(
                 "> Error while compiling the model:\n", str(err)
             )
-            return
 
-        self.__trained_model.summary()
+        return False
 
-    def start_training(self, hyperparameters, train_dataset, validation_dataset=None):
-        if (
-            self.training_status == self.TrainingStatus.Stopped
-            and self.__trained_model is not None
-        ):
-            signals_callback = SignalsCallback()
-            signals_callback.train_end.connect(self.stop_training)
+    def start_training(self):
+        """Starts the training on a new thread."""
 
-            self.stop_training_triggered.connect(signals_callback.stop_model)
+        if self.training_status == self.TrainingStatus.Not_Compiled:
+            successfully_compiled = self.compile_model()
 
-            self.__fit_worker = FitWorker(
-                self.__trained_model,
-                train_dataset,
-                hyperparameters,
-                [signals_callback],
+            if not successfully_compiled:
+                LOGGER.info("Couldn't compile model. Training not started.")
+                return
+
+        self.training_output_textbox.clear()
+
+        signals_callback = SignalsCallback()
+
+        # Update progress bar
+        self.__training_progress_bar.setMaximum(len(self.__train_dataset))
+        self.__training_progress_bar.reset()
+        signals_callback.train_batch_end.connect(self.__training_progress_bar.setValue)
+        signals_callback.train_end.connect(
+            lambda: self.__training_progress_bar.setValue(
+                self.__training_progress_bar.maximum()
             )
+        )
 
-            self.training_status = self.TrainingStatus.Running
-            self.__fit_worker.start()
+        # Stop training on request
+        signals_callback.train_end.connect(self.stop_training)
+        self.stop_training_triggered.connect(signals_callback.stop_model)
+
+        self.__fit_worker = FitWorker(
+            self.__trained_model,
+            self.__train_dataset,
+            self.__hyperparameters,
+            [signals_callback],
+        )
+
+        self.training_status = self.TrainingStatus.Running
+        self.__fit_worker.start()
 
     def stop_training(self):
+        """Stops the training."""
         self.training_status = self.TrainingStatus.Stopped
 
+    def __is_input_ready(self):
+        message = ""
+
+        if not self.__train_dataset:
+            message += "> Training dataset not specified\n"
+
+        if not self.__pretrained_model:
+            message += "> Model not specified.\n"
+
+        if not self.__hyperparameters:
+            message += "> Hyperparameters not specified.\n"
+
+        if message:
+            self.training_output_textbox.setPlainText(message)
+            LOGGER.info(message)
+            return False
+
+        return True
+
     def sizeHint(self) -> "QSize":
+        """Returns the expected size of the widget."""
         return QSize(500, 300)
 
     def __reduce__(self):

@@ -17,38 +17,29 @@ class TrainingConsoleNode(Node):
     def __init__(self, training_console_widget: "TrainingConsoleWidget"):
         super().__init__(title="Training Console", inner_widget=training_console_widget)
 
-        self.add_input_port("Train", port_type=Dataset)
-        self.add_input_port("Validation", port_type=Dataset)
+        self.add_input_port("Train Dataset", port_type=Dataset)
+        self.add_input_port("Validation Dataset", port_type=Dataset)
         self.add_input_port("Model", port_type=Model)
         self.add_input_port("Hyperparameters", port_type=dict)
 
         self.add_output_port("Trained Model", port_type=Model)
 
-        self.inputs["Train"].set_processor_function(self.__compile_model)
-        self.inputs["Model"].set_processor_function(self.__compile_model)
-        self.inputs["Hyperparameters"].set_processor_function(self.__compile_model)
+        self.inputs["Train Dataset"].set_processor_function(
+            self.inner_widget.set_train_dataset
+        )
+        self.inputs["Validation Dataset"].set_processor_function(
+            self.inner_widget.set_validation_dataset
+        )
+        self.inputs["Model"].set_processor_function(
+            self.inner_widget.set_pretrained_model
+        )
+        self.inputs["Hyperparameters"].set_processor_function(
+            self.inner_widget.set_hyperparameters
+        )
 
         self.outputs["Trained Model"].set_generator_function(
             self.inner_widget.get_trained_model
         )
-
-        self.inner_widget.start_training_triggered.connect(self.__start_training)
-        self.inner_widget.stop_training_triggered.connect(
-            self.inner_widget.stop_training
-        )
-
-    def __compile_model(self, _=None):
-        hyperparameters = self.inputs["Hyperparameters"].receive()
-        model = self.inputs["Model"].receive()
-        train_dataset = self.inputs["Train"].receive()
-
-        self.inner_widget.compile_model(hyperparameters, model, train_dataset)
-
-    def __start_training(self):
-        hyperparameters = self.inputs["Hyperparameters"].receive()
-        train_dataset = self.inputs["Train"].receive()
-
-        self.inner_widget.start_training(hyperparameters, train_dataset)
 
     def __reduce__(self):
         return (TrainingConsoleNode, (self.inner_widget,), super().__getstate__())
