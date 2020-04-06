@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
 from dial_core.utils import log
-from PySide2.QtCore import QObject, QSize, QThread, Signal
+from PySide2.QtCore import QObject, QSize, Qt, QThread, Signal
 from PySide2.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
@@ -25,8 +25,10 @@ LOGGER = log.get_logger(__name__)
 
 
 class SignalsCallback(keras.callbacks.Callback, QObject):
-    train_batch_end = Signal(int)
-    train_end = Signal()
+    epoch_begin = Signal(int, dict)
+    epoch_end = Signal(int, dict)
+    train_batch_end = Signal(int, dict)
+    train_end = Signal(dict)
 
     def __init__(self, batches_between_updates: int = 100):
         keras.callbacks.Callback.__init__(self)
@@ -34,12 +36,18 @@ class SignalsCallback(keras.callbacks.Callback, QObject):
 
         self.batches_between_updates = batches_between_updates
 
-    def on_train_batch_end(self, batch, logs=None):
+    def on_train_batch_end(self, batch: int, logs=None):
         if batch % self.batches_between_updates == 0:
-            self.train_batch_end.emit(batch)
+            self.train_batch_end.emit(batch, logs)
 
     def on_train_end(self, logs=None):
-        self.train_end.emit()
+        self.train_end.emit(logs)
+
+    def on_epoch_begin(self, epoch: int, logs=None):
+        self.epoch_begin.emit(epoch, logs)
+
+    def on_epoch_end(self, epoch: int, logs=None):
+        self.epoch_end.emit(epoch, logs)
 
     def stop_model(self):
         self.model.stop_training = True
@@ -70,8 +78,8 @@ class TrainingConsoleWidget(QWidget):
     It also can save and show an history of the last trained models.
     """
 
-    start_training_triggered = Signal()
-    stop_training_triggered = Signal()
+    training_started = Signal()
+    training_stopped = Signal()
 
     class TrainingStatus(Enum):
         Running = 1
@@ -99,7 +107,8 @@ class TrainingConsoleWidget(QWidget):
 
         self.__status_label = QLabel()
 
-        self.__training_progress_bar = QProgressBar()
+        self.__batch_progress_bar = QProgressBar()
+        self.__epoch_progress_bar = QProgressBar()
 
         self.training_output_textbox = QPlainTextEdit()
         self.training_output_textbox.setReadOnly(True)
@@ -112,9 +121,10 @@ class TrainingConsoleWidget(QWidget):
 
         self.__main_layout = QVBoxLayout()
         self.__main_layout.addLayout(self.__buttons_layout)
-        self.__main_layout.addWidget(self.__status_label)
+        self.__main_layout.addWidget(self.__status_label, Qt.AlignRight)
         self.__main_layout.addWidget(console_output_group)
-        self.__main_layout.addWidget(self.__training_progress_bar)
+        self.__main_layout.addWidget(self.__batch_progress_bar)
+        self.__main_layout.addWidget(self.__epoch_progress_bar)
         self.setLayout(self.__main_layout)
 
         # Connections
@@ -142,6 +152,7 @@ class TrainingConsoleWidget(QWidget):
             self.__start_training_button.setEnabled(False)
             self.__stop_training_button.setEnabled(True)
             self.__status_label.setText("Running")
+            self.start_training
 
         elif self.__training_status == self.TrainingStatus.Stopped:
             self.__start_training_button.setEnabled(True)
@@ -228,24 +239,51 @@ class TrainingConsoleWidget(QWidget):
                 LOGGER.info("Couldn't compile model. Training not started.")
                 return
 
+        total_train_batches = len(self.__train_dataset)
+        total_train_epochs = self.__hyperparameters["epochs"]
+
+        self.__batch_progress_bar.setMaximum(total_train_batches)
+        self.__epoch_progress_bar.setMaximum(total_train_epochs)
+        self.__epoch_progress_bar.setValue(0)
         self.training_output_textbox.clear()
 
+        def epoch_begin_update(epoch: int, logs):
+            message = f"==== Epoch {epoch + 1}/{total_train_epochs} ===="
+
+            LOGGER.info(message)
+            self.training_output_textbox.appendPlainText(message)
+            self.__epoch_progress_bar.setValue(epoch)
+
+        def batch_end_update(batch: int, logs):
+            # Update progress
+            self.__batch_progress_bar.setValue(batch)
+
+            # Log metrics on console
+            message = f'{logs["batch"]}/{total_train_batches}'
+
+            for (k, v) in list(logs.items())[2:]:
+                message += f" - {k}: {v:.4f}"
+
+            LOGGER.info(message)
+            self.training_output_textbox.appendPlainText(message)
+
+        def train_end_update(logs):
+            # Put the progress bar at 100% when the training ends
+            self.__batch_progress_bar.setValue(self.__batch_progress_bar.maximum())
+            self.__epoch_progress_bar.setValue(self.__epoch_progress_bar.maximum())
+
+            # Stop the training
+            self.stop_training()
+
+        # Connect callbacks
         signals_callback = SignalsCallback()
+        signals_callback.epoch_begin.connect(epoch_begin_update)
+        signals_callback.train_batch_end.connect(batch_end_update)
+        signals_callback.train_end.connect(train_end_update)
 
-        # Update progress bar
-        self.__training_progress_bar.setMaximum(len(self.__train_dataset))
-        self.__training_progress_bar.reset()
-        signals_callback.train_batch_end.connect(self.__training_progress_bar.setValue)
-        signals_callback.train_end.connect(
-            lambda: self.__training_progress_bar.setValue(
-                self.__training_progress_bar.maximum()
-            )
-        )
+        self.training_stopped.connect(signals_callback.stop_model)
 
-        # Stop training on request
-        signals_callback.train_end.connect(self.stop_training)
-        self.stop_training_triggered.connect(signals_callback.stop_model)
-
+        # Start training
         self.__fit_worker = FitWorker(
             self.__trained_model,
             self.__train_dataset,
@@ -256,8 +294,12 @@ class TrainingConsoleWidget(QWidget):
         self.training_status = self.TrainingStatus.Running
         self.__fit_worker.start()
 
+        self.training_started.emit()
+
     def stop_training(self):
         """Stops the training."""
+        self.training_stopped.emit()
+
         self.training_status = self.TrainingStatus.Stopped
 
     def __is_input_ready(self):
