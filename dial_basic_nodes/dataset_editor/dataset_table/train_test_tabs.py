@@ -8,7 +8,7 @@ from dial_core.datasets import Dataset
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QTabWidget
 
-from .containers import DatasetTableMVFactory
+from dial_basic_nodes.utils.dataset_table import DatasetTableWidgetFactory
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QWidget
@@ -25,64 +25,61 @@ class TrainTestTabs(QTabWidget):
     test_dataset_modified = Signal(Dataset)
 
     def __init__(
-        self, datasettable_mv_factory: "DatasetTableMVFactory", parent: "QWidget" = None
+        self,
+        dataset_table_widget_factory: "providers.Factory",
+        parent: "QWidget" = None,
     ):
         super().__init__(parent)
 
-        self.__train_model = datasettable_mv_factory.Model(parent=self)
-        self.__train_view = datasettable_mv_factory.View(parent=self)
-        self.__train_view.setModel(self.__train_model)
+        self._train_table_widget = dataset_table_widget_factory(parent=self)
+        self._test_table_widget = dataset_table_widget_factory(parent=self)
 
-        self.__test_model = datasettable_mv_factory.Model(parent=self)
-        self.__test_view = datasettable_mv_factory.View(parent=self)
-        self.__test_view.setModel(self.__test_model)
+        self.addTab(self._train_table_widget, "Train")
+        self.addTab(self._test_table_widget, "Test")
 
-        self.addTab(self.__train_view, "Train")
-        self.addTab(self.__test_view, "Test")
+        self._dataset_table_widget_factory = dataset_table_widget_factory
 
-        self.__train_model.dataset_modified.connect(
+        self._train_table_widget.dataset_modified.connect(
             lambda dataset: self.train_dataset_modified.emit(dataset)
         )
-        self.__test_model.dataset_modified.connect(
+        self._train_table_widget.dataset_modified.connect(
             lambda dataset: self.test_dataset_modified.emit(dataset)
         )
 
-        # Load empty datasets by default
-        self.set_train_dataset(train_dataset=Dataset())
-        self.set_test_dataset(test_dataset=Dataset())
-
     def train_dataset(self) -> "Dataset":
         """Returns the train dataset."""
-        return self.__train_model.dataset
+        return self._train_table_widget.dataset
 
     def test_dataset(self) -> "Dataset":
         """Returns the test dataset."""
-        return self.__test_model.dataset
+        return self._test_table_widget.dataset
 
-    def set_train_dataset(self, train_dataset: "Dataset"):
+    def load_train_dataset(self, train_dataset: "Dataset"):
         """Sets a new dataset as the train dataset."""
-        self.__train_model.load_dataset(train_dataset)
-        self.train_dataset_modified.emit(train_dataset)
+        self._train_table_widget.load_dataset(train_dataset)
 
-    def set_test_dataset(self, test_dataset: "Dataset"):
+    def load_test_dataset(self, test_dataset: "Dataset"):
         """Sets a new dataset as the test dataset."""
-        self.__test_model.load_dataset(test_dataset)
-        self.test_dataset_modified.emit(test_dataset)
+        self._test_table_widget.load_dataset(test_dataset)
 
     def __getstate__(self):
         return {
-            "train_dataset": self.__train_model.dataset,
-            "test_dataset": self.__test_model.dataset,
+            "train_dataset": self._train_model.dataset,
+            "test_dataset": self._test_model.dataset,
         }
 
     def __setstate__(self, new_state):
-        self.set_train_dataset(new_state["train_dataset"])
-        self.set_test_dataset(new_state["test_dataset"])
+        self.load_train_dataset(new_state["train_dataset"])
+        self.load_test_dataset(new_state["test_dataset"])
 
     def __reduce__(self):
-        return (TrainTestTabs, (DatasetTableMVFactory(),), self.__getstate__())
+        return (
+            TrainTestTabs,
+            (self._dataset_table_widget_factory,),
+            self.__getstate__(),
+        )
 
 
 TrainTestTabsFactory = providers.Factory(
-    TrainTestTabs, datasettable_mv_factory=DatasetTableMVFactory
+    TrainTestTabs, dataset_table_widget_factory=DatasetTableWidgetFactory.delegate()
 )

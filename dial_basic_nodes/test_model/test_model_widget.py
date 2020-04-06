@@ -9,6 +9,13 @@ from tensorflow import keras
 
 
 class TestModelWidget(QWidget):
+    # Top: Data about the current model.
+    # (Name, Training accuracy? Dunno)
+    # Bottom: List with all the training dataset things
+    # Three columns: Class, Predicted, Expected
+    # Accuracy of the test
+    # Possibility to filter and see only the failed tests, for example.
+    # When the button (Check tests) is clicked, update the predicted values.
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 

@@ -70,12 +70,12 @@ class DatasetEditorWidget(QWidget):
         """Returns the test dataset."""
         return self.__train_test_tabs.test_dataset()
 
-    def set_train_dataset(self, train: "Dataset"):
+    def load_train_dataset(self, train: "Dataset"):
         """Loads a new train dataset."""
-        self.__train_test_tabs.set_train_dataset(train)
+        self.__train_test_tabs.load_train_dataset(train)
 
-    def set_test_dataset(self, test: "Dataset"):
-        self.__train_test_tabs.set_test_dataset(test)
+    def load_test_dataset(self, test: "Dataset"):
+        self.__train_test_tabs.load_test_dataset(test)
 
     def update_train_labels(self, train: "Dataset"):
         """Update all the text labels related to the train dataset."""
@@ -132,8 +132,8 @@ class DatasetEditorWidget(QWidget):
             train, test = dataset_loader.load()
 
             self.__dataset_name_label.setText(dataset_loader.name)
-            self.set_train_dataset(train)
-            self.set_test_dataset(test)
+            self.load_train_dataset(train)
+            self.load_test_dataset(test)
 
     def __getstate__(self):
         return {

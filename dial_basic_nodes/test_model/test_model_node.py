@@ -18,12 +18,12 @@ class TestModelNode(Node):
         super().__init__(title="Test Model", inner_widget=test_model_widget)
 
         self.add_input_port("Test Dataset", port_type=Dataset)
-        self.add_input_port("Compiled Model", port_type=keras.models.Model)
+        self.add_input_port("Trained Model", port_type=keras.models.Model)
 
         self.inputs["Test Dataset"].set_processor_function(
             self.inner_widget.set_test_dataset
         )
-        self.inputs["Compiled Model"].set_processor_function(
+        self.inputs["Trained Model"].set_processor_function(
             self.inner_widget.set_compiled_model
         )
 

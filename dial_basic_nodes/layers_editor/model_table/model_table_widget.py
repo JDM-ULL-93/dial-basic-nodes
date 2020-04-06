@@ -1,7 +1,5 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import List
-
 import dependency_injector.providers as providers
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QVBoxLayout, QWidget

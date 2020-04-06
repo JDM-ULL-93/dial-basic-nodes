@@ -231,7 +231,6 @@ class TrainingConsoleWidget(QWidget):
 
     def start_training(self):
         """Starts the training on a new thread."""
-
         if self.training_status == self.TrainingStatus.Not_Compiled:
             successfully_compiled = self.compile_model()
 
@@ -302,7 +301,9 @@ class TrainingConsoleWidget(QWidget):
 
         self.training_status = self.TrainingStatus.Stopped
 
-    def __is_input_ready(self):
+    def __is_input_ready(self) -> bool:
+        """Checks if the input values used for training (model, dataset,
+        hyperparameters...) are valid."""
         message = ""
 
         if not self.__train_dataset:
