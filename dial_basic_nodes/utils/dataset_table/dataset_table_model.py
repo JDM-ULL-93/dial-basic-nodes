@@ -44,8 +44,8 @@ class DatasetTableModel(QAbstractTableModel):
         self._cached_data: List[List[Any]] = [[], []]
 
         self._role_map = {
-            Qt.DisplayRole: self.__display_role,
-            self.TypeRole: self.__type_role,
+            Qt.DisplayRole: self._display_role,
+            self.TypeRole: self._type_role,
         }
 
     @property
@@ -80,7 +80,7 @@ class DatasetTableModel(QAbstractTableModel):
 
     def rowCount(self, parent=QModelIndex()) -> int:
         """Returns the number of rows on the dataset."""
-        return len(self._cached_data[self.ColumnLabel.Input])
+        return len(self._data_of(self.ColumnLabel.Input))
 
     def columnCount(self, parent=QModelIndex()) -> int:
         """Returns the nubmer of columns on the dataset."""
@@ -98,7 +98,7 @@ class DatasetTableModel(QAbstractTableModel):
         if orientation == Qt.Horizontal:
             return (
                 f"{self.ColumnLabel(section).name} "
-                f"({type(self._types[section]).__name__})"
+                f"({type(self._type_of(section)).__name__})"
             )
 
         # Row header will have the row number as name
@@ -147,7 +147,7 @@ class DatasetTableModel(QAbstractTableModel):
             return QModelIndex()
 
         try:
-            return self.createIndex(row, column, self._cached_data[column][row])
+            return self.createIndex(row, column, self._data_of(column)[row])
         except IndexError:
             return QModelIndex()
 
@@ -180,8 +180,8 @@ class DatasetTableModel(QAbstractTableModel):
             start=row, end=row + count, role=Dataset.Role.Display
         )
 
-        self._cached_data[self.ColumnLabel.Input][row:row] = x_set
-        self._cached_data[self.ColumnLabel.Output][row:row] = y_set
+        self._data_of(self.ColumnLabel.Input)[row:row] = x_set
+        self._data_of(self.ColumnLabel.Output)[row:row] = y_set
 
         self.endInsertRows()
 
@@ -205,8 +205,8 @@ class DatasetTableModel(QAbstractTableModel):
 
         self.beginRemoveRows(QModelIndex(), row, row + count - 1)
 
-        del self._cached_data[self.ColumnLabel.Input][row : row + count]
-        del self._cached_data[self.ColumnLabel.Output][row : row + count]
+        del self._data_of(self.ColumnLabel.Input)[row : row + count]
+        del self._data_of(self.ColumnLabel.Output)[row : row + count]
 
         self.endRemoveRows()
         LOGGER.debug("Remove rows END")
@@ -214,18 +214,24 @@ class DatasetTableModel(QAbstractTableModel):
 
         return True
 
-    def __display_role(self, row: int, column: int) -> str:
+    def _type_of(self, column: int) -> DataType:
+        return self._types[column]
+
+    def _data_of(self, column: int) -> List[Any]:
+        return self._cached_data[column]
+
+    def _display_role(self, row: int, column: int) -> str:
         """Returns a text representation of each cell value."""
         try:
-            return self._cached_data[column][row]
+            return self._data_of(column)[row]
 
         except IndexError:
             return None
 
-    def __type_role(self, row: int, column: int):
+    def _type_role(self, row: int, column: int):
         """Returns the datatype associated to the row value."""
         try:
-            return self._types[column]
+            return self._type_of(column)
 
         except IndexError:
             return None
