@@ -73,14 +73,16 @@ class DatasetTableModel(QAbstractTableModel):
         ]
 
         # Clear all the caches
-        self._cached_data.clear()
-        self._cached_data = [[], []]
-        QPixmapCache.clear()
-
-        # Sends a signal that the model has been reset
-        self.modelReset.emit()
+        self.clear()
 
         self.dataset_loaded.emit(self._dataset)
+
+    def clear(self):
+        QPixmapCache.clear()
+        self._cached_data.clear()
+        self._cached_data = [[], []]
+
+        self.modelReset.emit()
 
     def rowCount(self, parent=QModelIndex()) -> int:
         """Returns the number of rows on the dataset."""

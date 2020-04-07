@@ -41,6 +41,10 @@ class TrainingConsoleNode(Node):
             self.inner_widget.get_trained_model
         )
 
+        self.inner_widget.training_stopped.connect(
+            lambda: self.outputs["Trained Model"].send()
+        )
+
     def __reduce__(self):
         return (TrainingConsoleNode, (self.inner_widget,), super().__getstate__())
 

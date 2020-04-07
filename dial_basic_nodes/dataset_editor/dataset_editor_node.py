@@ -21,19 +21,21 @@ class DatasetEditorNode(Node):
             title="Dataset Editor Node", inner_widget=dataset_editor_widget
         )
 
-        self.add_output_port(name="Train", port_type=Dataset)
-        self.add_output_port(name="Test", port_type=Dataset)
+        self.add_output_port(name="Train Dataset", port_type=Dataset)
+        self.add_output_port(name="Test Dataset", port_type=Dataset)
 
-        self.outputs["Train"].set_generator_function(
+        self.outputs["Train Dataset"].set_generator_function(
             self.inner_widget.get_train_dataset
         )
-        self.outputs["Test"].set_generator_function(self.inner_widget.get_test_dataset)
+        self.outputs["Test Dataset"].set_generator_function(
+            self.inner_widget.get_test_dataset
+        )
 
         self.inner_widget.train_dataset_loaded.connect(
-            lambda: self.outputs["Train"].send()
+            lambda: self.outputs["Train Dataset"].send()
         )
         self.inner_widget.test_dataset_loaded.connect(
-            lambda: self.outputs["Test"].send()
+            lambda: self.outputs["Test Dataset"].send()
         )
 
     def __reduce__(self):

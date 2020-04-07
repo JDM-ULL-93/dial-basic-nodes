@@ -4,11 +4,14 @@ from typing import Optional
 
 import dependency_injector.providers as providers
 from dial_core.datasets import Dataset
+from dial_core.utils import log
 from PySide2.QtCore import QSize
-from PySide2.QtWidgets import QVBoxLayout, QWidget
+from PySide2.QtWidgets import QPushButton, QVBoxLayout, QWidget
 from tensorflow import keras
 
 from .test_dataset_table import TestDatasetTableWidgetFactory
+
+LOGGER = log.get_logger(__name__)
 
 
 class TestModelWidget(QWidget):
@@ -23,39 +26,50 @@ class TestModelWidget(QWidget):
         super().__init__(parent)
 
         # Componentes
-        self.__compiled_model: Optional["keras.models.Model"] = None
+        self._trained_model: Optional["keras.models.Model"] = None
 
         # Widgets
-        self.__test_dataset_widget = test_dataset_widget
+        self._test_dataset_widget = test_dataset_widget
+        self._predict_button = QPushButton("Predict values")
 
-        self.__main_layout = QVBoxLayout()
-        self.__main_layout.setContentsMargins(0, 0, 0, 0)
-        self.__main_layout.addWidget(self.__test_dataset_widget)
+        self._main_layout = QVBoxLayout()
+        self._main_layout.setContentsMargins(0, 0, 0, 0)
+        self._main_layout.addWidget(self._predict_button)
+        self._main_layout.addWidget(self._test_dataset_widget)
 
-        self.setLayout(self.__main_layout)
+        self.setLayout(self._main_layout)
+
+        # Connections
+        self._predict_button.clicked.connect(self.predict_values)
 
     def set_test_dataset(self, test_dataset: "Dataset"):
-        print("Set test dataset")
-        self.__test_dataset_widget.load_dataset(test_dataset)
+        LOGGER.debug("Test dataset set: %s", test_dataset)
+        self._test_dataset_widget.load_dataset(test_dataset)
 
-        self.predict_values()
-
-    def set_compiled_model(self, model: "keras.models.Model"):
-        print("Set compiled model")
-        self.__compiled_model = model
-
-        self.predict_values()
+    def set_trained_model(self, model: "keras.models.Model"):
+        LOGGER.debug("Compiled model set: %s", model)
+        self._trained_model = model
 
     def predict_values(self):
-        if self.__test_dataset_widget.dataset is None or self.__compiled_model is None:
+        if self._trained_model is None:
+            LOGGER.debug("No trained model selected.")
             return
 
-        # X = self.__compiled_model.predict(self.__test_dataset)
-        print("Predicted")
+        predicted_data = self._trained_model.predict(self._test_dataset_widget.dataset)
+        self._test_dataset_widget.set_predict_values(predicted_data)
+
+        LOGGER.debug(
+            "Predicting %s with %s",
+            self._test_dataset_widget.dataset,
+            self._trained_model,
+        )
 
     def sizeHint(self) -> "QSize":
         """Optimal size for visualizing the widget."""
         return QSize(500, 300)
+
+    def __reduce__(self):
+        return (TestModelWidget, (self._test_dataset_widget))
 
 
 TestModelWidgetFactory = providers.Factory(

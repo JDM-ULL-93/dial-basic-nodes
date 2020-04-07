@@ -24,7 +24,7 @@ class TestModelNode(Node):
             self.inner_widget.set_test_dataset
         )
         self.inputs["Trained Model"].set_processor_function(
-            self.inner_widget.set_compiled_model
+            self.inner_widget.set_trained_model
         )
 
     def __reduce__(self):

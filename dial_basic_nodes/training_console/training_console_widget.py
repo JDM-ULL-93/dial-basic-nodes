@@ -297,9 +297,9 @@ class TrainingConsoleWidget(QWidget):
 
     def stop_training(self):
         """Stops the training."""
-        self.training_stopped.emit()
-
         self.training_status = self.TrainingStatus.Stopped
+
+        self.training_stopped.emit()
 
     def __is_input_ready(self) -> bool:
         """Checks if the input values used for training (model, dataset,

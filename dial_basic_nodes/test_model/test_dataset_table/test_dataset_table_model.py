@@ -1,6 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 from enum import IntEnum
+from typing import Any, List
 
 import dependency_injector.providers as providers
 # from dial_core.datasets import Dataset
@@ -20,8 +21,17 @@ class TestDatasetTableModel(DatasetTableModel):
 
         self._prediction_data = []
 
-    # def load_dataset(self, dataset: "Dataset"):
-    #     super().load_dataset(dataset)
+    def set_predict_values(self, prediction_data: List[Any]):
+        self._prediction_data = [
+            self._type_of(self.ColumnLabel.Prediction).convert_to_expected_format(value)
+            for value in prediction_data
+        ]
+
+    def clear(self):
+        super().clear()
+
+        self._prediction_data.clear()
+        self._prediction_data = []
 
     def _data_of(self, column: int):
         if column == self.ColumnLabel.Input:

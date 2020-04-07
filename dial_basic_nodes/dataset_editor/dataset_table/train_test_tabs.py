@@ -64,8 +64,8 @@ class TrainTestTabs(QTabWidget):
 
     def __getstate__(self):
         return {
-            "train_dataset": self._train_model.dataset,
-            "test_dataset": self._test_model.dataset,
+            "train_dataset": self._train_table_widget.dataset,
+            "test_dataset": self._test_table_widget.dataset,
         }
 
     def __setstate__(self, new_state):
