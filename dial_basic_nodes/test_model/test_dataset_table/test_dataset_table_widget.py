@@ -11,6 +11,7 @@ from dial_basic_nodes.utils.dataset_table import (
     DatasetTableWidget,
 )
 
+from .test_dataset_table_item_delegate import TestDatasetTableItemDelegate
 from .test_dataset_table_model import (
     TestDatasetTableModel,
     TestDatasetTableModelFactory,
@@ -25,6 +26,8 @@ class TestDatasetTableWidget(DatasetTableWidget):
         parent: "QWidget" = None,
     ):
         super().__init__(view, model, parent)
+
+        self._dataset_table_view.setItemDelegate(TestDatasetTableItemDelegate())
 
     def set_predict_values(self, prediction_data: List[Any]):
         self._dataset_table_model.set_predict_values(prediction_data)

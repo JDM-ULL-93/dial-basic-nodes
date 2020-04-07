@@ -1,6 +1,5 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
