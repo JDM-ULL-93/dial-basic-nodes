@@ -4,6 +4,9 @@ from .hyperparameters_config_node import (
     HyperparametersConfigNode,
     HyperparametersConfigNodeFactory,
 )
+from .hyperparameters_config_node_transformer import (
+    HyperparametersConfigNodeTransformer,
+)
 from .hyperparameters_config_widget import (
     HyperparametersConfigWidget,
     HyperparametersConfigWidgetFactory,
@@ -12,6 +15,7 @@ from .hyperparameters_config_widget import (
 __all__ = [
     "HyperparametersConfigNode",
     "HyperparametersConfigNodeFactory",
+    "HyperparametersConfigNodeTransformer",
     "HyperparametersConfigWidget",
     "HyperparametersConfigWidgetFactory",
 ]

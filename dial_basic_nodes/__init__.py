@@ -7,11 +7,17 @@ when working with classical Deep Learning problems.
 """
 
 from dial_core.node_editor import NodeRegistrySingleton
+from dial_core.notebook import NodeTransformersRegistrySingleton
 
-from .dataset_editor import DatasetEditorNode, DatasetEditorNodeFactory
+from .dataset_editor import (
+    DatasetEditorNode,
+    DatasetEditorNodeFactory,
+    DatasetEditorNodeTransformer,
+)
 from .hyperparameters_config import (
     HyperparametersConfigNode,
     HyperparametersConfigNodeFactory,
+    HyperparametersConfigNodeTransformer,
 )
 from .layers_editor import LayersEditorNode, LayersEditorNodeFactory
 from .test_model import TestModelNode, TestModelNodeFactory
@@ -29,6 +35,14 @@ def load_plugin():
     node_registry.register_node("Training Console", TrainingConsoleNodeFactory)
     node_registry.register_node("Test Model", TestModelNodeFactory)
 
+    node_transformers_registry = NodeTransformersRegistrySingleton()
+    node_transformers_registry.register_transformer(
+        DatasetEditorNode, DatasetEditorNodeTransformer
+    )
+    node_transformers_registry.register_transformer(
+        HyperparametersConfigNode, HyperparametersConfigNodeTransformer
+    )
+
 
 def unload_plugin():
     node_registry = NodeRegistrySingleton()
@@ -38,6 +52,10 @@ def unload_plugin():
     node_registry.unregister_node("Hyperparameters Config")
     node_registry.unregister_node("Training Console")
     node_registry.unregister_node("Test Model")
+
+    node_transformers_registry = NodeTransformersRegistrySingleton()
+    node_transformers_registry.unregister_transformer(DatasetEditorNode)
+    node_transformers_registry.unregister_transformer(HyperparametersConfigNode)
 
 
 __all__ = [

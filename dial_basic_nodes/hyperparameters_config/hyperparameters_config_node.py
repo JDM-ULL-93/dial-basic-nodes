@@ -20,9 +20,10 @@ class HyperparametersConfigNode(Node):
         )
 
         self.add_output_port("Hyperparameters", port_type=dict)
-        self.outputs["Hyperparameters"].set_generator_function(
-            self.inner_widget.get_hyperparameters
-        )
+        self.outputs["Hyperparameters"].set_generator_function(self.get_hyperparameters)
+
+    def get_hyperparameters(self):
+        return self.inner_widget.get_hyperparameters()
 
     def __reduce__(self):
         return (HyperparametersConfigNode, (self.inner_widget,), super().__getstate__())
