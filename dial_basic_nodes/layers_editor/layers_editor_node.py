@@ -21,6 +21,9 @@ class LayersEditorNode(Node):
 
         self.inner_widget.layers_modified.connect(lambda: self.outputs["Model"].send())
 
+    def get_model(self):
+        return self.inner_widget.get_model()
+
     def __reduce__(self):
         return (LayersEditorNode, (self.inner_widget,), super().__getstate__())
 

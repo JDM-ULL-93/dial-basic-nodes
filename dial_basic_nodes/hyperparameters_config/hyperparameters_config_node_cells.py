@@ -3,10 +3,10 @@
 import json
 
 import nbformat as nbf
-from dial_core.notebook import NodeTransformer
+from dial_core.notebook import NodeCells
 
 
-class HyperparametersConfigNodeTransformer(NodeTransformer):
+class HyperparametersConfigNodeCells(NodeCells):
     def _body_cells(self):
         value_cell = nbf.v4.new_code_cell(
             (

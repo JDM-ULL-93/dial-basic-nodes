@@ -7,21 +7,29 @@ when working with classical Deep Learning problems.
 """
 
 from dial_core.node_editor import NodeRegistrySingleton
-from dial_core.notebook import NodeTransformersRegistrySingleton
+from dial_core.notebook import NodeCellsRegistrySingleton
 
 from .dataset_editor import (
     DatasetEditorNode,
+    DatasetEditorNodeCells,
     DatasetEditorNodeFactory,
-    DatasetEditorNodeTransformer,
 )
 from .hyperparameters_config import (
     HyperparametersConfigNode,
+    HyperparametersConfigNodeCells,
     HyperparametersConfigNodeFactory,
-    HyperparametersConfigNodeTransformer,
 )
-from .layers_editor import LayersEditorNode, LayersEditorNodeFactory
+from .layers_editor import (
+    LayersEditorNode,
+    LayersEditorNodeCells,
+    LayersEditorNodeFactory,
+)
 from .test_model import TestModelNode, TestModelNodeFactory
-from .training_console import TrainingConsoleNode, TrainingConsoleNodeFactory
+from .training_console import (
+    TrainingConsoleNode,
+    TrainingConsoleNodeCells,
+    TrainingConsoleNodeFactory,
+)
 
 
 def load_plugin():
@@ -35,12 +43,14 @@ def load_plugin():
     node_registry.register_node("Training Console", TrainingConsoleNodeFactory)
     node_registry.register_node("Test Model", TestModelNodeFactory)
 
-    node_transformers_registry = NodeTransformersRegistrySingleton()
-    node_transformers_registry.register_transformer(
-        DatasetEditorNode, DatasetEditorNodeTransformer
+    node_cells_registry = NodeCellsRegistrySingleton()
+    node_cells_registry.register_transformer(DatasetEditorNode, DatasetEditorNodeCells)
+    node_cells_registry.register_transformer(
+        HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
-    node_transformers_registry.register_transformer(
-        HyperparametersConfigNode, HyperparametersConfigNodeTransformer
+    node_cells_registry.register_transformer(LayersEditorNode, LayersEditorNodeCells)
+    node_cells_registry.register_transformer(
+        TrainingConsoleNode, TrainingConsoleNodeCells
     )
 
 
@@ -53,9 +63,11 @@ def unload_plugin():
     node_registry.unregister_node("Training Console")
     node_registry.unregister_node("Test Model")
 
-    node_transformers_registry = NodeTransformersRegistrySingleton()
-    node_transformers_registry.unregister_transformer(DatasetEditorNode)
-    node_transformers_registry.unregister_transformer(HyperparametersConfigNode)
+    node_cells_registry = NodeCellsRegistrySingleton()
+    node_cells_registry.unregister_transformer(DatasetEditorNode)
+    node_cells_registry.unregister_transformer(HyperparametersConfigNode)
+    node_cells_registry.unregister_transformer(LayersEditorNode)
+    node_cells_registry.unregister_transformer(TrainingConsoleNode)
 
 
 __all__ = [

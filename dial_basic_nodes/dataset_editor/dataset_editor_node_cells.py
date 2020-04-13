@@ -1,10 +1,10 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 import nbformat as nbf
-from dial_core.notebook import NodeTransformer
+from dial_core.notebook import NodeCells
 
 
-class DatasetEditorNodeTransformer(NodeTransformer):
+class DatasetEditorNodeCells(NodeCells):
     def _body_cells(self):
         value_cell = nbf.v4.new_code_cell(
             (
