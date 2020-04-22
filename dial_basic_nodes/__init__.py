@@ -9,11 +9,6 @@ when working with classical Deep Learning problems.
 from dial_core.node_editor import NodeRegistrySingleton
 from dial_core.notebook import NodeCellsRegistrySingleton
 
-from .dataset_editor import (
-    DatasetEditorNode,
-    DatasetEditorNodeCells,
-    DatasetEditorNodeFactory,
-)
 from .hyperparameters_config import (
     HyperparametersConfigNode,
     HyperparametersConfigNodeCells,
@@ -30,12 +25,30 @@ from .training_console import (
     TrainingConsoleNodeCells,
     TrainingConsoleNodeFactory,
 )
+from .ttv_editor import (
+    TTVSetsEditorNode,
+    TTVSetsEditorNodeCells,
+    TTVSetsEditorNodeFactory,
+)
+from .ttv_importer import (
+    TTVSetsImporterNode,
+    TTVSetsImporterNodeCells,
+    TTVSetsImporterNodeFactory,
+)
+from .ttv_splitter import (
+    TTVSetsSplitterNode,
+    TTVSetsSplitterNodeCells,
+    TTVSetsSplitterNodeFactory,
+)
 
 
 def load_plugin():
     node_registry = NodeRegistrySingleton()
 
-    node_registry.register_node("Dataset Editor", DatasetEditorNodeFactory)
+    # Register Node
+    node_registry.register_node("TTV Editor", TTVSetsEditorNodeFactory)
+    node_registry.register_node("TTV Importer", TTVSetsImporterNodeFactory)
+    node_registry.register_node("TTV Splitter", TTVSetsSplitterNodeFactory)
     node_registry.register_node("Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node(
         "Hyperparameters Config", HyperparametersConfigNodeFactory
@@ -43,8 +56,15 @@ def load_plugin():
     node_registry.register_node("Training Console", TrainingConsoleNodeFactory)
     node_registry.register_node("Test Model", TestModelNodeFactory)
 
+    # Register Notebook Transformers
     node_cells_registry = NodeCellsRegistrySingleton()
-    node_cells_registry.register_transformer(DatasetEditorNode, DatasetEditorNodeCells)
+    node_cells_registry.register_transformer(TTVSetsEditorNode, TTVSetsEditorNodeCells)
+    node_cells_registry.register_transformer(
+        TTVSetsImporterNode, TTVSetsImporterNodeCells
+    )
+    node_cells_registry.register_transformer(
+        TTVSetsSplitterNode, TTVSetsSplitterNodeCells
+    )
     node_cells_registry.register_transformer(
         HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
@@ -57,14 +77,20 @@ def load_plugin():
 def unload_plugin():
     node_registry = NodeRegistrySingleton()
 
-    node_registry.unregister_node("Dataset Editor")
+    # Unregister Nodes
+    node_registry.unregister_node("TTV Editor")
+    node_registry.unregister_node("TTV Importer")
+    node_registry.unregister_node("TTV Splitter")
+    node_registry.unregister_node("Dataset Importer")
     node_registry.unregister_node("Layers Editor")
     node_registry.unregister_node("Hyperparameters Config")
     node_registry.unregister_node("Training Console")
     node_registry.unregister_node("Test Model")
 
+    # Unregister Notebook Transformers
     node_cells_registry = NodeCellsRegistrySingleton()
-    node_cells_registry.unregister_transformer(DatasetEditorNode)
+    node_cells_registry.unregister_transformer(TTVSetsEditorNode)
+    node_cells_registry.unregister_transformer(TTVSetsImporterNodeCells)
     node_cells_registry.unregister_transformer(HyperparametersConfigNode)
     node_cells_registry.unregister_transformer(LayersEditorNode)
     node_cells_registry.unregister_transformer(TrainingConsoleNode)
@@ -73,8 +99,8 @@ def unload_plugin():
 __all__ = [
     "load_plugin",
     "unload_plugin",
-    "DatasetEditorNode",
-    "DatasetEditorNodeFactory",
+    "TTVSetsEditorNode",
+    "TTVSetsEditorNodeFactory",
     "LayersEditorNode",
     "LayersEditorNodeFactory",
     "TrainingConsoleNode",

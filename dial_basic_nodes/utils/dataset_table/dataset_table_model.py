@@ -56,13 +56,14 @@ class DatasetTableModel(QAbstractTableModel):
 
     def load_dataset(self, dataset: "Dataset"):
         """Loads a new dataset and starts fetching it on the model."""
-        if not dataset:
-            return
-
         LOGGER.debug("Loading dataset %s...", dataset)
 
-        # Set a new dataset
+        self.clear()
+
         self._dataset = dataset
+
+        if not dataset:
+            return
 
         # Clear the loaded types
         self._types = [dataset.x_type, dataset.y_type]
@@ -70,9 +71,6 @@ class DatasetTableModel(QAbstractTableModel):
             {type(dataset.x_type).__name__: dataset.x_type},
             {type(dataset.y_type).__name__: dataset.y_type},
         ]
-
-        # Clear all the caches
-        self.clear()
 
         self.dataset_loaded.emit(self._dataset)
 

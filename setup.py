@@ -41,11 +41,15 @@ setup(
         'dial_basic_nodes.layers_editor.layers_tree',
         'dial_basic_nodes.layers_editor.layers_tree.abstract_tree_model',
         'dial_basic_nodes.layers_editor.model_table',
-        'dial_basic_nodes.training_console'
+        'dial_basic_nodes.test_model',
+        'dial_basic_nodes.test_model.test_dataset_table',
+        'dial_basic_nodes.training_console', 'dial_basic_nodes.utils',
+        'dial_basic_nodes.utils.dataset_table'
     ],
     package_dir={"": "."},
     package_data={},
-    install_requires=['dial-core==v0.12a0', 'dial-gui==v0.8a0'],
+    install_requires=['dial-core', 'dial-gui'],
+    dependency_links=['/home/david/dial-core', '/home/david/dial-gui'],
     extras_require={
         "dev": [
             "black==19.*,>=19.10.0", "docstr-coverage==1.*,>=1.0.5",
