@@ -41,6 +41,12 @@ from .ttv_splitter import (
     TTVSetsSplitterNodeFactory,
 )
 
+from .ttv_merger import (
+    TTVSetsMergerNode,
+    TTVSetsMergerNodeCells,
+    TTVSetsMergerNodeFactory,
+)
+
 
 def load_plugin():
     node_registry = NodeRegistrySingleton()
@@ -49,6 +55,7 @@ def load_plugin():
     node_registry.register_node("TTV Editor", TTVSetsEditorNodeFactory)
     node_registry.register_node("TTV Importer", TTVSetsImporterNodeFactory)
     node_registry.register_node("TTV Splitter", TTVSetsSplitterNodeFactory)
+    node_registry.register_node("TTV Merger", TTVSetsMergerNodeFactory)
     node_registry.register_node("Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node(
         "Hyperparameters Config", HyperparametersConfigNodeFactory
@@ -65,6 +72,7 @@ def load_plugin():
     node_cells_registry.register_transformer(
         TTVSetsSplitterNode, TTVSetsSplitterNodeCells
     )
+    node_cells_registry.register_transformer(TTVSetsMergerNode, TTVSetsMergerNodeCells)
     node_cells_registry.register_transformer(
         HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
@@ -81,6 +89,7 @@ def unload_plugin():
     node_registry.unregister_node("TTV Editor")
     node_registry.unregister_node("TTV Importer")
     node_registry.unregister_node("TTV Splitter")
+    node_registry.unregister_node("TTV Merger")
     node_registry.unregister_node("Dataset Importer")
     node_registry.unregister_node("Layers Editor")
     node_registry.unregister_node("Hyperparameters Config")
@@ -91,6 +100,8 @@ def unload_plugin():
     node_cells_registry = NodeCellsRegistrySingleton()
     node_cells_registry.unregister_transformer(TTVSetsEditorNode)
     node_cells_registry.unregister_transformer(TTVSetsImporterNodeCells)
+    node_cells_registry.unregister_transformer(TTVSetsSplitterNodeCells)
+    node_cells_registry.unregister_transformer(TTVSetsMergerNodeCells)
     node_cells_registry.unregister_transformer(HyperparametersConfigNode)
     node_cells_registry.unregister_transformer(LayersEditorNode)
     node_cells_registry.unregister_transformer(TrainingConsoleNode)
@@ -101,6 +112,12 @@ __all__ = [
     "unload_plugin",
     "TTVSetsEditorNode",
     "TTVSetsEditorNodeFactory",
+    "TTVSetsImporterNode",
+    "TTVSetsImporterNodeFactory",
+    "TTVSetsSplitterNode",
+    "TTVSetsSplitterNodeFactory",
+    "TTVSetsMergerNode",
+    "TTVSetsMergerNodeFactory",
     "LayersEditorNode",
     "LayersEditorNodeFactory",
     "TrainingConsoleNode",

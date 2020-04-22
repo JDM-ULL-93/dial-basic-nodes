@@ -3,6 +3,6 @@
 from dial_core.notebook import NodeCells
 
 
-class TTVSetsSplitterNodeCells(NodeCells):
+class TTVSetsMergerNodeCells(NodeCells):
     def _body_cells(self):
         return []
