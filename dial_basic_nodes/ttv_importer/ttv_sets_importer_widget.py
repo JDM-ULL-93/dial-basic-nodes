@@ -31,10 +31,10 @@ class TTVSetsImporterWidget(QWidget):
 
         # Widgets
         self._directory_picker_button = QPushButton("Load TTV from file...")
-        self._directory_picker_button.clicked.connect(self._load_ttv_from_filesys)
+        self._directory_picker_button.clicked.connect(self.pick_ttv_from_filesystem)
 
         self._predefined_load_button = QPushButton("Load predefined datasets...")
-        self._predefined_load_button.clicked.connect(self._load_predefined_datasets)
+        self._predefined_load_button.clicked.connect(self.pick_predefined_ttv)
 
         self._name_label = QLabel("Name:")
         self._train_label = QLabel("Train:")
@@ -56,13 +56,18 @@ class TTVSetsImporterWidget(QWidget):
         return self._ttv
 
     def set_ttv(self, ttv: "TTVSets"):
+        """Sets a new TTVSets object as the loaded ttv."""
         self._ttv = ttv
         self._update_labels_text()
         self.ttv_loaded.emit(self._ttv)
 
-        LOGGER.info(f"TTVSets loaded! {ttv}")
+        LOGGER.info(f"TTVSets loaded: {ttv}")
 
-    def _load_ttv_from_filesys(self):
+    def pick_ttv_from_filesystem(self):
+        """Shows a dialog for picking a directory from the filesystem.
+
+        The selected directory will be loaded as a TTVSets dataset.
+        """
         LOGGER.debug("Picking a TTV Directory...")
         selected_ttv_dir = QFileDialog.getExistingDirectory(
             parent=self,
@@ -74,25 +79,10 @@ class TTVSetsImporterWidget(QWidget):
             LOGGER.debug("Loading cancelled...")
             return
 
-        try:
-            ttv = TTVSetsIO.load(selected_ttv_dir, TTVSetsFormatsContainer)
+        self.load_ttv_from_dir(selected_ttv_dir)
 
-            self.set_ttv(ttv)
-
-            # if self._cache_dir:
-            #     TTVSetsIO.save(
-            #         TTVSetsFormatsContainer.NpzFormat, self._cache_dir, self._ttv,
-            #     )
-            #     LOGGER.debug("Loaded dir cached. {self}")
-            # else:
-            #     LOGGER.debug(
-            #         "No cache dir specified for {self}. Define a Project directory"
-            #     )
-
-        except IOError as err:
-            LOGGER.exception("Couldn't load TTV Sets!", err)
-
-    def _load_predefined_datasets(self):
+    def pick_predefined_ttv(self):
+        """Picks and loads a TTVSets object from a predefined list of TTVSetsLoaders."""
         exit_code = self._ttv_sets_dialog.exec_()
 
         if exit_code != 1:
@@ -102,18 +92,17 @@ class TTVSetsImporterWidget(QWidget):
         ttv = self._ttv_sets_dialog.selected_loader().load()
         self.set_ttv(ttv)
 
-    def _save_on_cache(self, cache_dir):
-        if not cache_dir:
-            LOGGER.debug(f"Can't save, empty directory: {cache_dir}")
-            return
+    def load_ttv_from_dir(self, ttv_dir: str):
+        """Loads a TTVSets object from a directory."""
+        try:
+            ttv = TTVSetsIO.load(ttv_dir, TTVSetsFormatsContainer)
+            self.set_ttv(ttv)
 
-        TTVSetsIO.save(
-            TTVSetsFormatsContainer.NpzFormat(), cache_dir, self._ttv,
-        )
-
-        LOGGER.debug(f"TTV Saved on cached directory {cache_dir}")
+        except IOError as err:
+            LOGGER.exception("Couldn't load TTV Sets!", err)
 
     def _update_labels_text(self):
+        """Update the text labels to reflect the TTVSets information"""
         self._name_label.setText(f"Name: {self._ttv.name if self._ttv else ''}")
         self._train_label.setText(
             f"Train: {str(self._ttv.train if self._ttv else None)}"
@@ -127,17 +116,10 @@ class TTVSetsImporterWidget(QWidget):
         """Optimal size of the widget."""
         return QSize(100, 150)
 
-    def __getstate__(self):
-        return {"ttv_name": self._ttv.name if self._ttv else ""}
-
-    def __setstate__(self, new_state):
-        name = new_state["ttv_name"]
-
     def __reduce__(self):
         return (
             TTVSetsImporterWidget,
             (self._ttv_sets_dialog, None),
-            self.__getstate__(),
         )
 
 
