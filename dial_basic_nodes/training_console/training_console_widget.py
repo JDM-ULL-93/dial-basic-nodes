@@ -1,9 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import datetime
 from enum import Enum
 from typing import Dict, Optional
 
 import dependency_injector.providers as providers
+import tensorflow as tf
 from PySide2.QtCore import QObject, QSize, Qt, QThread, Signal
 from PySide2.QtWidgets import (
     QGroupBox,
@@ -15,6 +17,7 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from tensorboard import program
 from tensorflow import keras
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
@@ -276,12 +279,22 @@ class TrainingConsoleWidget(QWidget):
 
         self.training_stopped.connect(signals_callback.stop_model)
 
+        log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+
+        tb = program.TensorBoard()
+        tb.configure(argv=[None, "--logdir", log_dir])
+        url = tb.launch()
+        print("Launched Tensorboard instance in:", url)
+
+        tf_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+        tf_callback.set_model(self._trained_model)
+
         # Start training
         self._fit_worker = FitWorker(
             self._trained_model,
             self._ttv.train,
             self._hyperparameters,
-            [signals_callback],
+            callbacks=[signals_callback, tf_callback],
         )
 
         self.training_status = self.TrainingStatus.Running
