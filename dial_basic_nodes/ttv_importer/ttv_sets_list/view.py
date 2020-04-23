@@ -13,5 +13,8 @@ class TTVSetsListView(QListView):
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 
+    def __reduce__(self):
+        return (TTVSetsListView, ())
+
 
 TTVSetsListViewFactory = providers.Factory(TTVSetsListView)

@@ -116,6 +116,10 @@ class TTVSetsListDialog(QDialog):
             ", ".join([str(ttv_sets_loader.x_type), str(ttv_sets_loader.y_type)])
         )
 
+    def __reduce__(self):
+        return (TTVSetsListDialog, (self._model, self._view))
+
+
 
 TTVSetsListDialogFactory = providers.Factory(
     TTVSetsListDialog, model=TTVSetsListModelFactory, view=TTVSetsListViewFactory

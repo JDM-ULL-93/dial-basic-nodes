@@ -107,7 +107,7 @@ class TTVSetsEditorWidget(QWidget):
         return QSize(500, 300)
 
     def __reduce__(self):
-        return (TTVSetsEditorWidget, (self._ttv_tabs,), super().__getstate__())
+        return (TTVSetsEditorWidget, (self._ttv_tabs,))
 
 
 TTVSetsEditorWidgetFactory = providers.Factory(

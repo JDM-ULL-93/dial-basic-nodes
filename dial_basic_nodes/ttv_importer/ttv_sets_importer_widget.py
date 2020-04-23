@@ -100,7 +100,7 @@ class TTVSetsImporterWidget(QWidget):
         return QSize(100, 150)
 
     def __reduce__(self):
-        return (TTVSetsImporterWidget, (), super().__getstate__())
+        return (TTVSetsImporterWidget, (self._ttv_sets_dialog,))
 
 
 TTVSetsImporterWidgetFactory = providers.Factory(

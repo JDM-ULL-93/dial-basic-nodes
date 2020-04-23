@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
-from dial_core.datasets import Dataset
+from dial_core.datasets import Dataset, TTVSets
 from dial_core.node_editor import Node
 from tensorflow.keras import Model
 
@@ -17,18 +17,14 @@ class TrainingConsoleNode(Node):
     def __init__(self, training_console_widget: "TrainingConsoleWidget"):
         super().__init__(title="Training Console", inner_widget=training_console_widget)
 
-        self.add_input_port("Train Dataset", port_type=Dataset)
-        self.add_input_port("Validation Dataset", port_type=Dataset)
+        self.add_input_port("TTV Sets", port_type=TTVSets)
         self.add_input_port("Model", port_type=Model)
         self.add_input_port("Hyperparameters", port_type=dict)
 
         self.add_output_port("Trained Model", port_type=Model)
 
-        self.inputs["Train Dataset"].set_processor_function(
-            self.inner_widget.set_train_dataset
-        )
-        self.inputs["Validation Dataset"].set_processor_function(
-            self.inner_widget.set_validation_dataset
+        self.inputs["TTV Sets"].set_processor_function(
+            self.inner_widget.set_ttv
         )
         self.inputs["Model"].set_processor_function(
             self.inner_widget.set_pretrained_model

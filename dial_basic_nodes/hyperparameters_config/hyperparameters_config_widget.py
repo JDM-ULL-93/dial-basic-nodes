@@ -40,11 +40,16 @@ class HyperparametersConfigWidget(QWidget):
             ["SGD", "RMSprop", "Adagrad", "Adadelta", "Adam", "Adamax", "Nadam"]
         )
 
+        self.__batch_size_spinbox = QSpinBox(parent=self)
+        self.__batch_size_spinbox.setValue(32)
+        self.__batch_size_spinbox.setMinimum(1)
+
         # Layouts
         self.__main_layout = QFormLayout()
         self.__main_layout.addRow("Epochs", self.__epoch_spinbox)
         self.__main_layout.addRow("Optimizer", self.__optimizer_combobox)
         self.__main_layout.addRow("Loss function", self.__loss_function_combobox)
+        self.__main_layout.addRow("Batch size", self.__batch_size_spinbox)
         self.setLayout(self.__main_layout)
 
         # Hyperparameters dictionary
@@ -52,10 +57,12 @@ class HyperparametersConfigWidget(QWidget):
             "epochs": self.__epoch_spinbox.value(),
             "loss_function": self.__loss_function_combobox.currentText(),
             "optimizer": self.__optimizer_combobox.currentText(),
+            "batch_size": self.__batch_size_spinbox.value()
         }
 
         self.__epoch_spinbox.valueChanged.connect(self.set_epochs)
         self.__loss_function_combobox.currentTextChanged.connect(self.set_loss_function)
+        self.__batch_size_spinbox.valueChanged.connect(self.set_batch_size)
 
     def get_hyperparameters(self):
         return self.__hyperparameters
@@ -74,6 +81,13 @@ class HyperparametersConfigWidget(QWidget):
         self.__hyperparameters["loss_function"] = new_loss_function
         self.__loss_function_combobox.setCurrentText(new_loss_function)
 
+    def get_batch_size(self):
+        return self.__hyperparameters["batch_size"]
+
+    def set_batch_size(self, new_batch_size: int):
+        self.__hyperparameters["batch_size"] = new_batch_size
+        self.__batch_size_spinbox.setValue(new_batch_size)
+
     def sizeHint(self) -> "QSize":
         return QSize(350, 200)
 
@@ -88,6 +102,7 @@ class HyperparametersConfigWidget(QWidget):
             self.__hyperparameters["loss_function"]
         )
         self.__optimizer_combobox.setCurrentText(self.__hyperparameters["optimizer"])
+        self.__batch_size_spinbox.setValue(self.__hyperparameters["batch_size"])
 
     def __reduce__(self):
         return (HyperparametersConfigWidget, (), self.__getstate__())

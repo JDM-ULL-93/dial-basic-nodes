@@ -41,6 +41,9 @@ class TTVSetsListModel(QAbstractListModel):
 
         return None
 
+    def __reduce__(self):
+        return (TTVSetsListModel, (self._ttv_sets_list,))
+
 
 TTVSetsListModelFactory = providers.Factory(TTVSetsListModel)
 

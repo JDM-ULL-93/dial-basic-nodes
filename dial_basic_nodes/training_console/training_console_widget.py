@@ -4,8 +4,6 @@ from enum import Enum
 from typing import Dict, Optional
 
 import dependency_injector.providers as providers
-from dial_core.datasets import Dataset
-from dial_core.utils import log
 from PySide2.QtCore import QObject, QSize, Qt, QThread, Signal
 from PySide2.QtWidgets import (
     QGroupBox,
@@ -20,6 +18,9 @@ from PySide2.QtWidgets import (
 from tensorflow import keras
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
+
+from dial_core.datasets import TTVSets
+from dial_core.utils import log
 
 LOGGER = log.get_logger(__name__)
 
@@ -57,16 +58,16 @@ class FitWorker(QThread):
     def __init__(self, model, train_dataset, hyperparameters, callbacks):
         super().__init__()
 
-        self.__model = model
-        self.__train_dataset = train_dataset
-        self.__hyperparameters = hyperparameters
-        self.__callbacks = callbacks
+        self._model = model
+        self._train_dataset = train_dataset
+        self._hyperparameters = hyperparameters
+        self._callbacks = callbacks
 
     def run(self):
-        self.__model.fit(
-            self.__train_dataset,
-            epochs=self.__hyperparameters["epochs"],
-            callbacks=self.__callbacks,
+        self._model.fit(
+            self._train_dataset,
+            epochs=self._hyperparameters["epochs"],
+            callbacks=self._callbacks,
         )
 
 
@@ -90,25 +91,24 @@ class TrainingConsoleWidget(QWidget):
         super().__init__(parent)
 
         # Components
-        self.__pretrained_model: Optional["keras.models.Model"] = None
-        self.__train_dataset: Optional["Dataset"] = None
-        self.__validation_dataset: Optional["Dataset"] = None
-        self.__hyperparameters: Optional[Dict] = None
+        self._pretrained_model: Optional["keras.models.Model"] = None
+        self._ttv: Optional["TTVSets"] = None
+        self._hyperparameters: Optional[Dict] = None
 
-        self.__trained_model: Optional["keras.models.Model"] = None
+        self._trained_model: Optional["keras.models.Model"] = None
 
         # Widgets
-        self.__start_training_button = QPushButton("Start training")
-        self.__stop_training_button = QPushButton("Stop training")
+        self._start_training_button = QPushButton("Start training")
+        self._stop_training_button = QPushButton("Stop training")
 
-        self.__buttons_layout = QHBoxLayout()
-        self.__buttons_layout.addWidget(self.__start_training_button)
-        self.__buttons_layout.addWidget(self.__stop_training_button)
+        self._buttons_layout = QHBoxLayout()
+        self._buttons_layout.addWidget(self._start_training_button)
+        self._buttons_layout.addWidget(self._stop_training_button)
 
-        self.__status_label = QLabel()
+        self._status_label = QLabel()
 
-        self.__batch_progress_bar = QProgressBar()
-        self.__epoch_progress_bar = QProgressBar()
+        self._batch_progress_bar = QProgressBar()
+        self._epoch_progress_bar = QProgressBar()
 
         self.training_output_textbox = QPlainTextEdit()
         self.training_output_textbox.setReadOnly(True)
@@ -119,26 +119,26 @@ class TrainingConsoleWidget(QWidget):
         console_output_layout.addWidget(self.training_output_textbox)
         console_output_group.setLayout(console_output_layout)
 
-        self.__main_layout = QVBoxLayout()
-        self.__main_layout.addLayout(self.__buttons_layout)
-        self.__main_layout.addWidget(self.__status_label, Qt.AlignRight)
-        self.__main_layout.addWidget(console_output_group)
-        self.__main_layout.addWidget(self.__batch_progress_bar)
-        self.__main_layout.addWidget(self.__epoch_progress_bar)
-        self.setLayout(self.__main_layout)
+        self._main_layout = QVBoxLayout()
+        self._main_layout.addLayout(self._buttons_layout)
+        self._main_layout.addWidget(self._status_label, Qt.AlignRight)
+        self._main_layout.addWidget(console_output_group)
+        self._main_layout.addWidget(self._batch_progress_bar)
+        self._main_layout.addWidget(self._epoch_progress_bar)
+        self.setLayout(self._main_layout)
 
         # Connections
-        self.__start_training_button.clicked.connect(self.start_training)
-        self.__stop_training_button.clicked.connect(self.stop_training)
+        self._start_training_button.clicked.connect(self.start_training)
+        self._stop_training_button.clicked.connect(self.stop_training)
 
         # Inner workings
         self.training_status = self.TrainingStatus.Not_Compiled
-        self.__training_thread = None
+        self._training_thread = None
 
     @property
     def training_status(self):
         """Returns the current status of the training (Running, Stopped...)"""
-        return self.__training_status
+        return self._training_status
 
     @training_status.setter
     def training_status(self, new_status):
@@ -146,73 +146,67 @@ class TrainingConsoleWidget(QWidget):
 
         Doing so will update the interface accordingly.
         """
-        self.__training_status = new_status
+        self._training_status = new_status
 
-        if self.__training_status == self.TrainingStatus.Running:
-            self.__start_training_button.setEnabled(False)
-            self.__stop_training_button.setEnabled(True)
-            self.__status_label.setText("Running")
+        if self._training_status == self.TrainingStatus.Running:
+            self._start_training_button.setEnabled(False)
+            self._stop_training_button.setEnabled(True)
+            self._status_label.setText("Running")
             self.start_training
 
-        elif self.__training_status == self.TrainingStatus.Stopped:
-            self.__start_training_button.setEnabled(True)
-            self.__stop_training_button.setEnabled(False)
-            self.__status_label.setText("Stopped")
+        elif self._training_status == self.TrainingStatus.Stopped:
+            self._start_training_button.setEnabled(True)
+            self._stop_training_button.setEnabled(False)
+            self._status_label.setText("Stopped")
 
-        elif self.__train_dataset == self.TrainingStatus.Not_Compiled:
-            self.__start_training_button.setEnabled(True)
-            self.__stop_training_button.setEnabled(False)
-            self.__status_label.setText("Not Compiled")
+        elif self._training_status == self.TrainingStatus.Not_Compiled:
+            self._start_training_button.setEnabled(True)
+            self._stop_training_button.setEnabled(False)
+            self._status_label.setText("Not Compiled")
 
-    def set_train_dataset(self, train_dataset: "Dataset"):
-        """Sets a new training dataset."""
-        self.__train_dataset = train_dataset
-
-        self.training_status = self.TrainingStatus.Not_Compiled
-
-    def set_validation_dataset(self, validation_dataset: "Dataset"):
-        """Sets a new validation dataset."""
-        self.__validation_dataset = validation_dataset
+    def set_ttv(self, ttv: "TTVSets"):
+        """Sets the Train/Test/Validation models used for training."""
+        self._ttv = ttv
 
     def set_pretrained_model(self, pretrained_model: "Model"):
         """Sets a new pretrained model for training."""
-        self.__pretrained_model = pretrained_model
+        self._pretrained_model = pretrained_model
 
         self.training_status = self.TrainingStatus.Not_Compiled
 
     def set_hyperparameters(self, hyperparameters: Dict):
         """Sets new hyperparameters for training."""
-        self.__hyperparameters = hyperparameters
+        self._hyperparameters = hyperparameters
 
         self.training_status = self.TrainingStatus.Not_Compiled
 
     def get_trained_model(self):
         """Returns the model after it has been trained."""
-        return self.__trained_model
+        return self._trained_model
 
     def compile_model(self):
         """Compile the model with the passed hyperparameters. The dataset is needed for
         the input shape."""
         LOGGER.info("Starting to compile the model...")
 
-        if not self.__is_input_ready():
+        if not self._is_input_ready():
             return False
 
         # Create a new model based on the pretrained one, but with a new InputLayer
         # compatible with the dataset
-        input_layer = Input(self.__train_dataset.input_shape)
-        output = self.__pretrained_model(input_layer)
+        input_layer = Input(self._ttv.train.input_shape)
+        output = self._pretrained_model(input_layer)
 
-        self.__trained_model = Model(input_layer, output)
+        self._trained_model = Model(input_layer, output)
 
         try:
-            self.__trained_model.compile(
-                optimizer=self.__hyperparameters["optimizer"],
-                loss=self.__hyperparameters["loss_function"],
+            self._trained_model.compile(
+                optimizer=self._hyperparameters["optimizer"],
+                loss=self._hyperparameters["loss_function"],
                 metrics=["accuracy"],
             )
 
-            self.__trained_model.summary()
+            self._trained_model.summary()
 
             LOGGER.info("Model compiled successfully!!")
 
@@ -238,12 +232,12 @@ class TrainingConsoleWidget(QWidget):
                 LOGGER.info("Couldn't compile model. Training not started.")
                 return
 
-        total_train_batches = len(self.__train_dataset)
-        total_train_epochs = self.__hyperparameters["epochs"]
+        total_train_batches = len(self._ttv.train)
+        total_train_epochs = self._hyperparameters["epochs"]
 
-        self.__batch_progress_bar.setMaximum(total_train_batches)
-        self.__epoch_progress_bar.setMaximum(total_train_epochs)
-        self.__epoch_progress_bar.setValue(0)
+        self._batch_progress_bar.setMaximum(total_train_batches)
+        self._epoch_progress_bar.setMaximum(total_train_epochs)
+        self._epoch_progress_bar.setValue(0)
         self.training_output_textbox.clear()
 
         def epoch_begin_update(epoch: int, logs):
@@ -251,11 +245,11 @@ class TrainingConsoleWidget(QWidget):
 
             LOGGER.info(message)
             self.training_output_textbox.appendPlainText(message)
-            self.__epoch_progress_bar.setValue(epoch)
+            self._epoch_progress_bar.setValue(epoch)
 
         def batch_end_update(batch: int, logs):
             # Update progress
-            self.__batch_progress_bar.setValue(batch)
+            self._batch_progress_bar.setValue(batch)
 
             # Log metrics on console
             message = f'{logs["batch"]}/{total_train_batches}'
@@ -268,8 +262,8 @@ class TrainingConsoleWidget(QWidget):
 
         def train_end_update(logs):
             # Put the progress bar at 100% when the training ends
-            self.__batch_progress_bar.setValue(self.__batch_progress_bar.maximum())
-            self.__epoch_progress_bar.setValue(self.__epoch_progress_bar.maximum())
+            self._batch_progress_bar.setValue(self._batch_progress_bar.maximum())
+            self._epoch_progress_bar.setValue(self._epoch_progress_bar.maximum())
 
             # Stop the training
             self.stop_training()
@@ -283,15 +277,15 @@ class TrainingConsoleWidget(QWidget):
         self.training_stopped.connect(signals_callback.stop_model)
 
         # Start training
-        self.__fit_worker = FitWorker(
-            self.__trained_model,
-            self.__train_dataset,
-            self.__hyperparameters,
+        self._fit_worker = FitWorker(
+            self._trained_model,
+            self._ttv.train,
+            self._hyperparameters,
             [signals_callback],
         )
 
         self.training_status = self.TrainingStatus.Running
-        self.__fit_worker.start()
+        self._fit_worker.start()
 
         self.training_started.emit()
 
@@ -301,18 +295,18 @@ class TrainingConsoleWidget(QWidget):
 
         self.training_stopped.emit()
 
-    def __is_input_ready(self) -> bool:
+    def _is_input_ready(self) -> bool:
         """Checks if the input values used for training (model, dataset,
         hyperparameters...) are valid."""
         message = ""
 
-        if not self.__train_dataset:
+        if not self._ttv.train:
             message += "> Training dataset not specified\n"
 
-        if not self.__pretrained_model:
+        if not self._pretrained_model:
             message += "> Model not specified.\n"
 
-        if not self.__hyperparameters:
+        if not self._hyperparameters:
             message += "> Hyperparameters not specified.\n"
 
         if message:
