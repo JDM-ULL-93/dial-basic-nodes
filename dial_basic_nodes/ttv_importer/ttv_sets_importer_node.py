@@ -16,19 +16,20 @@ class TTVSetsImporterNode(Node):
     """The TTVSetsImporterNode class provides several methods for loading datasets from
     the file system."""
 
-    def __init__(self, ttv_sets_importer_widget: "TTVSetsImporterWidget"):
+    def __init__(self, ttv_importer_widget: "TTVSetsImporterWidget"):
         super().__init__(
-            title="TTV Importer Node", inner_widget=ttv_sets_importer_widget
+            title="TTV Importer Node", inner_widget=ttv_importer_widget
         )
 
         self.add_output_port(name="TTV Sets", port_type=TTVSets)
+        self.outputs["TTV Sets"].set_generator_function(self.inner_widget.get_ttv)
 
-        self.outputs["TTV Sets"].set_generator_function(self.inner_widget.get_ttv_sets)
+        self.inner_widget.ttv_loaded.connect(lambda: self.outputs["TTV Sets"].send())
 
     def __reduce__(self):
         return (TTVSetsImporterNode, (self.inner_widget,), super().__getstate__())
 
 
 TTVSetsImporterNodeFactory = providers.Factory(
-    TTVSetsImporterNode, ttv_sets_importer_widget=TTVSetsImporterWidgetFactory
+    TTVSetsImporterNode, ttv_importer_widget=TTVSetsImporterWidgetFactory
 )
