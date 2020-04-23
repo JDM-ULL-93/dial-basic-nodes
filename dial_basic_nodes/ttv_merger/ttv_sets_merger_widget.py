@@ -11,8 +11,8 @@ from PySide2.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QWidget
 
 class TTVSetsMergerWidget(QWidget):
     class DatasetStatus(Enum):
-        Valid = "#00FF00"
-        Undefined = "#FF0000"
+        Valid = "#009211"
+        Undefined = "#B6002A"
 
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)

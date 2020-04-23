@@ -114,7 +114,7 @@ class TTVSetsImporterWidget(QWidget):
 
     def sizeHint(self) -> "QSize":
         """Optimal size of the widget."""
-        return QSize(100, 150)
+        return QSize(450, 150)
 
     def __reduce__(self):
         return (
