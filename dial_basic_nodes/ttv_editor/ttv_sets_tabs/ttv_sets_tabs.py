@@ -52,7 +52,6 @@ class TTVSetsTabs(QTabWidget):
         return (
             TTVSetsTabs,
             (self._dataset_table_widget_factory,),
-            super().__getstate__(),
         )
 
 
