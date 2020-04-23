@@ -1,6 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 import nbformat as nbf
+
 from dial_core.notebook import NodeCells
 
 
@@ -8,7 +9,7 @@ class TrainingConsoleNodeCells(NodeCells):
     def _body_cells(self):
         model_var = self._node.inputs["Model"].word_id()
         hyperparameters_var = self._node.inputs["Hyperparameters"].word_id()
-        train_dataset_var = self._node.inputs["Train Dataset"].word_id()
+        train_dataset_var = self._node.inputs["TTV Sets"].word_id()
         trained_model_var = self._node.outputs["Trained Model"].word_id()
 
         compile_source = (
@@ -35,5 +36,5 @@ class TrainingConsoleNodeCells(NodeCells):
         return [
             nbf.v4.new_code_cell(compile_source),
             nbf.v4.new_code_cell(summary_source),
-            nbf.v4.new_code_cell(fit_source)
+            nbf.v4.new_code_cell(fit_source),
         ]

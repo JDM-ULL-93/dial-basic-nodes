@@ -19,7 +19,7 @@ from .layers_editor import (
     LayersEditorNodeCells,
     LayersEditorNodeFactory,
 )
-from .test_model import TestModelNode, TestModelNodeFactory
+from .test_model import TestModelNode, TestModelNodeCells, TestModelNodeFactory
 from .training_console import (
     TrainingConsoleNode,
     TrainingConsoleNodeCells,
@@ -35,16 +35,15 @@ from .ttv_importer import (
     TTVSetsImporterNodeCells,
     TTVSetsImporterNodeFactory,
 )
-from .ttv_splitter import (
-    TTVSetsSplitterNode,
-    TTVSetsSplitterNodeCells,
-    TTVSetsSplitterNodeFactory,
-)
-
 from .ttv_merger import (
     TTVSetsMergerNode,
     TTVSetsMergerNodeCells,
     TTVSetsMergerNodeFactory,
+)
+from .ttv_splitter import (
+    TTVSetsSplitterNode,
+    TTVSetsSplitterNodeCells,
+    TTVSetsSplitterNodeFactory,
 )
 
 
@@ -76,6 +75,7 @@ def load_plugin():
     node_cells_registry.register_transformer(
         HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
+    node_cells_registry.register_transformer(TestModelNode, TestModelNodeCells)
     node_cells_registry.register_transformer(LayersEditorNode, LayersEditorNodeCells)
     node_cells_registry.register_transformer(
         TrainingConsoleNode, TrainingConsoleNodeCells
@@ -105,6 +105,7 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(HyperparametersConfigNode)
     node_cells_registry.unregister_transformer(LayersEditorNode)
     node_cells_registry.unregister_transformer(TrainingConsoleNode)
+    node_cells_registry.unregister_transformer(TestModelNode)
 
 
 __all__ = [

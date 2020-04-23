@@ -7,6 +7,8 @@ from dial_core.notebook import NodeCells
 
 
 class HyperparametersConfigNodeCells(NodeCells):
+    """The HyperparametersConfigNodeCells class generates a block of code corresponding
+    to the hyperparameters dictionary."""
     def _body_cells(self):
         value_cell = nbf.v4.new_code_cell(
             (
