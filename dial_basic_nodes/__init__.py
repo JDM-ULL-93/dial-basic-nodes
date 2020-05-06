@@ -19,6 +19,11 @@ from .layers_editor import (
     LayersEditorNodeCells,
     LayersEditorNodeFactory,
 )
+from .predefined_models import (
+    PredefinedModelsNode,
+    PredefinedModelsNodeCells,
+    PredefinedModelsNodeFactory,
+)
 from .test_model import TestModelNode, TestModelNodeCells, TestModelNodeFactory
 from .training_console import (
     TrainingConsoleNode,
@@ -30,16 +35,15 @@ from .ttv_editor import (
     TTVSetsEditorNodeCells,
     TTVSetsEditorNodeFactory,
 )
-from .ttv_importer import (
-    TTVSetsImporterNode,
-    TTVSetsImporterNodeCells,
-    TTVSetsImporterNodeFactory,
-)
-
 from .ttv_exporter import (
     TTVSetsExporterNode,
     TTVSetsExporterNodeCells,
     TTVSetsExporterNodeFactory,
+)
+from .ttv_importer import (
+    TTVSetsImporterNode,
+    TTVSetsImporterNodeCells,
+    TTVSetsImporterNodeFactory,
 )
 from .ttv_merger import (
     TTVSetsMergerNode,
@@ -63,6 +67,7 @@ def load_plugin():
     node_registry.register_node("Datasets/TTV Splitter", TTVSetsSplitterNodeFactory)
     node_registry.register_node("Datasets/TTV Merger", TTVSetsMergerNodeFactory)
     node_registry.register_node("Models/Layers Editor", LayersEditorNodeFactory)
+    node_registry.register_node("Models/Predefined Models", PredefinedModelsNodeFactory)
     node_registry.register_node(
         "Training/Hyperparameters Config", HyperparametersConfigNodeFactory
     )
@@ -90,6 +95,9 @@ def load_plugin():
     node_cells_registry.register_transformer(
         TrainingConsoleNode, TrainingConsoleNodeCells
     )
+    node_cells_registry.register_transformer(
+        PredefinedModelsNode, PredefinedModelsNodeCells
+    )
 
 
 def unload_plugin():
@@ -102,6 +110,7 @@ def unload_plugin():
     node_registry.unregister_node("Datasets/TTV Splitter")
     node_registry.unregister_node("Datasets/TTV Merger")
     node_registry.unregister_node("Models/Layers Editor")
+    node_registry.unregister_node("Models/Predefined Models")
     node_registry.unregister_node("Training/Hyperparameters Config")
     node_registry.unregister_node("Training/Training Console")
     node_registry.unregister_node("Training/Test Model")
@@ -115,6 +124,7 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(TTVSetsMergerNodeCells)
     node_cells_registry.unregister_transformer(HyperparametersConfigNode)
     node_cells_registry.unregister_transformer(LayersEditorNode)
+    node_cells_registry.unregister_node(PredefinedModelsNode)
     node_cells_registry.unregister_transformer(TrainingConsoleNode)
     node_cells_registry.unregister_transformer(TestModelNode)
 
