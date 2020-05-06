@@ -37,7 +37,7 @@ class TTVSetsListModel(QAbstractListModel):
 
     def data(self, index, role=Qt.DisplayRole) -> Optional[Any]:
         if role == Qt.DisplayRole:
-            return f"{self._ttv_sets_list[index.row()]}"
+            return str(self._ttv_sets_list[index.row()])
 
         return None
 

@@ -66,17 +66,12 @@ class TTVSetsImporterNode(Node):
             project = find_parent_of(self, ProjectGUI)
             project_dir = project.directory() if project else None
 
-            print("Project: ", project)
-            print("Parent //////", self.parent)
-
             if not project:
-                print("NOTTT PROJECT")
                 return
 
             self.inner_widget.load_ttv_from_dir(
                 project_dir + os.path.sep + new_state["ttv_name"]
             )
-            print("Loaded?")
 
     def __reduce__(self):
         return (TTVSetsImporterNode, (self.inner_widget,), self.__getstate__())

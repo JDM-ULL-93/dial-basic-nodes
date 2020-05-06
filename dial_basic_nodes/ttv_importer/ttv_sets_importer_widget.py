@@ -4,12 +4,11 @@
 from typing import Optional
 
 import dependency_injector.providers as providers
-from PySide2.QtCore import QSize, Signal
-from PySide2.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget
-
 from dial_core.datasets import TTVSets
 from dial_core.datasets.io import TTVSetsFormatsContainer, TTVSetsIO
 from dial_core.utils import log
+from PySide2.QtCore import QSize, Signal
+from PySide2.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from .ttv_sets_list import PredefinedTTVSetsListDialogFactory, TTVSetsListDialog
 
@@ -105,11 +104,11 @@ class TTVSetsImporterWidget(QWidget):
         """Update the text labels to reflect the TTVSets information"""
         self._name_label.setText(f"Name: {self._ttv.name if self._ttv else ''}")
         self._train_label.setText(
-            f"Train: {str(self._ttv.train if self._ttv else None)}"
+            f"Train: {str(self._ttv.train) if self._ttv else None}"
         )
-        self._test_label.setText(f"Test: {str(self._ttv.test if self._ttv else None)}")
+        self._test_label.setText(f"Test: {str(self._ttv.test) if self._ttv else None}")
         self._validation_label.setText(
-            f"Validation: {str(self._ttv.validation if self._ttv else None)}"
+            f"Validation: {str(self._ttv.validation) if self._ttv else None}"
         )
 
     def sizeHint(self) -> "QSize":
