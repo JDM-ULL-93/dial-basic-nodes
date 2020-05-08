@@ -1,15 +1,23 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-
-from typing import Optional
-
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import TTVSetsFormatsContainer, TTVSetsIO
+from dial_core.datasets.io import TTVSetsFormatsContainer
 from dial_core.utils import log
 from PySide2.QtCore import QSize, Signal
-from PySide2.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide2.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+    QStackedWidget,
+)
 
+from .formats_widgets import (
+    CategoricalImagesFormatWidgetFactory,
+    NpzFormatWidgetFactory,
+)
 from .ttv_sets_list import PredefinedTTVSetsListDialogFactory, TTVSetsListDialog
 
 LOGGER = log.get_logger(__name__)
@@ -23,93 +31,37 @@ class TTVSetsImporterWidget(QWidget):
     ):
         super().__init__(parent)
 
-        # Components
-        self._ttv: Optional["TTVSets"] = None
+        self.format_gui_mapper = {
+            TTVSetsFormatsContainer.NpzFormat: NpzFormatWidgetFactory,
+            TTVSetsFormatsContainer.CategoryImagesFormat: CategoricalImagesFormatWidgetFactory,
+        }
 
-        self._ttv_sets_dialog = ttv_sets_dialog
+        self._formats_stacked_widget = QStackedWidget()
 
-        # Widgets
-        self._directory_picker_button = QPushButton("Load TTV from file...")
-        self._directory_picker_button.clicked.connect(self.pick_ttv_from_filesystem)
+        self._formatter_selector = QComboBox()
+        for factory in self.format_gui_mapper.keys():
+            self._formatter_selector.addItem(factory.cls.__name__, factory)
+            self._formats_stacked_widget.addWidget(self.format_gui_mapper[factory]())
 
-        self._predefined_load_button = QPushButton("Load predefined datasets...")
-        self._predefined_load_button.clicked.connect(self.pick_predefined_ttv)
-
-        self._name_label = QLabel("Name:")
-        self._train_label = QLabel("Train:")
-        self._test_label = QLabel("Test:")
-        self._validation_label = QLabel("Validation:")
+        horizontal_line = QFrame()
+        horizontal_line.setFrameShape(QFrame.HLine)
+        horizontal_line.setFrameShadow(QFrame.Sunken)
+        horizontal_line.setFixedHeight(2)
+        horizontal_line.setContentsMargins(0, 30, 0, 0)
 
         self._main_layout = QVBoxLayout()
-        self._main_layout.addWidget(self._directory_picker_button)
-        self._main_layout.addWidget(self._predefined_load_button)
-        self._main_layout.addWidget(self._name_label)
-        self._main_layout.addWidget(self._train_label)
-        self._main_layout.addWidget(self._test_label)
-        self._main_layout.addWidget(self._validation_label)
+        self._main_layout.addWidget(self._formatter_selector)
+        self._main_layout.addWidget(horizontal_line)
+        self._main_layout.addWidget(self._formats_stacked_widget)
 
         self.setLayout(self._main_layout)
 
+        self._formatter_selector.currentIndexChanged[int].connect(
+            lambda i: self._formats_stacked_widget.setCurrentIndex(i)
+        )
+
     def get_ttv(self) -> "TTVSets":
-        """Returns the loaded TTVSets object."""
-        return self._ttv
-
-    def set_ttv(self, ttv: "TTVSets"):
-        """Sets a new TTVSets object as the loaded ttv."""
-        self._ttv = ttv
-        self._update_labels_text()
-        self.ttv_loaded.emit(self._ttv)
-
-        LOGGER.info(f"TTVSets loaded: {ttv}")
-
-    def pick_ttv_from_filesystem(self):
-        """Shows a dialog for picking a directory from the filesystem.
-
-        The selected directory will be loaded as a TTVSets dataset.
-        """
-        LOGGER.debug("Picking a TTV Directory...")
-        selected_ttv_dir = QFileDialog.getExistingDirectory(
-            parent=self,
-            caption="TTV Folder",
-            options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
-        )
-
-        if not selected_ttv_dir:
-            LOGGER.debug("Loading cancelled...")
-            return
-
-        self.load_ttv_from_dir(selected_ttv_dir)
-
-    def pick_predefined_ttv(self):
-        """Picks and loads a TTVSets object from a predefined list of TTVSetsLoaders."""
-        exit_code = self._ttv_sets_dialog.exec_()
-
-        if exit_code != 1:
-            LOGGER.debug("Loading cancelled...")
-            return
-
-        ttv = self._ttv_sets_dialog.selected_loader().load()
-        self.set_ttv(ttv)
-
-    def load_ttv_from_dir(self, ttv_dir: str):
-        """Loads a TTVSets object from a directory."""
-        try:
-            ttv = TTVSetsIO.load(ttv_dir, TTVSetsFormatsContainer)
-            self.set_ttv(ttv)
-
-        except IOError as err:
-            LOGGER.exception("Couldn't load TTV Sets!", err)
-
-    def _update_labels_text(self):
-        """Update the text labels to reflect the TTVSets information"""
-        self._name_label.setText(f"Name: {self._ttv.name if self._ttv else ''}")
-        self._train_label.setText(
-            f"Train: {str(self._ttv.train) if self._ttv else None}"
-        )
-        self._test_label.setText(f"Test: {str(self._ttv.test) if self._ttv else None}")
-        self._validation_label.setText(
-            f"Validation: {str(self._ttv.validation) if self._ttv else None}"
-        )
+        return None
 
     def sizeHint(self) -> "QSize":
         """Optimal size of the widget."""

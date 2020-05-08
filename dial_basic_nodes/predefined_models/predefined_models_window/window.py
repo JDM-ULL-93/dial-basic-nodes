@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import dependency_injector.providers as providers
 from PySide2.QtCore import Slot
 from PySide2.QtWidgets import (
+    QCheckBox,
     QDialogButtonBox,
     QFormLayout,
     QHBoxLayout,
@@ -50,33 +51,19 @@ class PredefinedModelsWindow(QWidget):
 
         # Create widgets
         self._name_label = QLabel()
-        self._brief_label = QLabel()
-        self._types_label = QLabel()
+        self._include_top_checkbox = QCheckBox("Include top")
 
         # Create Layouts
         self._main_layout = QHBoxLayout()
         self._description_layout = QFormLayout()
 
-        # Setup UI
-        self._setup_ui()
-
-        self._view.activated.connect(self._selected_loader_changed)
-
-    def selected_model(self) -> Optional["TTVSetsLoader"]:
-        """
-        Return the loaded currently selected by the Window.
-        """
-        return self._selected_model
-
-    def _setup_ui(self):
         # Main layout
         self.setLayout(self._main_layout)
 
         # Right side (Description)
 
         self._description_layout.addRow("Name:", self._name_label)
-        self._description_layout.addRow("Brief:", self._brief_label)
-        self._description_layout.addRow("Data types:", self._types_label)
+        self._description_layout.addWidget(self._include_top_checkbox)
 
         # Extra vertical layout for window button_box widget
         right_layout = QVBoxLayout()
@@ -85,6 +72,15 @@ class PredefinedModelsWindow(QWidget):
         # Add widgets to main layout
         self._main_layout.addWidget(self._view)
         self._main_layout.addLayout(right_layout)
+
+        # // Connections
+        self._view.activated.connect(self._selected_loader_changed)
+
+    def selected_model(self) -> Optional["TTVSetsLoader"]:
+        """
+        Return the loaded currently selected by the Window.
+        """
+        return self._selected_model
 
     @Slot("QModelIndex")
     def _selected_loader_changed(self, index: "QModelIndex"):
