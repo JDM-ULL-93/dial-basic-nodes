@@ -41,6 +41,10 @@ class DatatypeSelector(QGroupBox):
             self._change_active_widget
         )
 
+    @property
+    def selected_datatype(self):
+        return self._datatype_combobox.currentData()
+
     def _change_active_widget(self, index):
         self._stacked_widgets.setCurrentIndex(index)
 
@@ -50,6 +54,9 @@ class DatatypeSelector(QGroupBox):
             self._stacked_widgets.setVisible(False)
         else:
             self._stacked_widgets.setVisible(True)
+
+    def to_dict(self):
+        return self.selected_datatype.to_dict()
 
 
 DatatypeSelectorFactory = providers.Factory(

@@ -48,18 +48,6 @@ class FileLoaderGroup(QGroupBox):
 
         self._pick_file_button.clicked.connect(self._load_from_filesystem)
 
-        # selected_ttv_dir = QFileDialog.getExistingDirectory(
-        #     parent=self,
-        #     caption="TTV Folder",
-        #     options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
-        # )
-
-        # if not selected_ttv_dir:
-        #     LOGGER.debug("Loading cancelled...")
-        #     return
-
-        # self.load_ttv_from_dir(selected_ttv_dir)
-
     @property
     def layout(self) -> "QVBoxLayout":
         return self._main_layout
@@ -79,12 +67,7 @@ class FileLoaderGroup(QGroupBox):
             self._pick_file_text.setText(self._file_picker_dialog.selectedFiles()[0])
 
 
-class DatatypePickers(QWidget):
-    def __init__(self, parent: "QWidget" = None):
-        super().__init__(parent)
-
-
-class NpzFormatWidget(QWidget):
+class NpzWidget(QWidget):
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 
@@ -100,5 +83,12 @@ class NpzFormatWidget(QWidget):
 
         self.setLayout(self._main_layout)
 
+    def to_dict(self):
+        return {
+            "train": {"path": self._train_file_loader.path},
+            "test": {"path": self._test_file_loader.path},
+            "validation": {"path": self._validation_file_loader.path},
+        }
 
-NpzFormatWidgetFactory = providers.Factory(NpzFormatWidget)
+
+NpzWidgetFactory = providers.Factory(NpzWidget)

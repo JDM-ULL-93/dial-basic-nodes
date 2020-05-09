@@ -4,7 +4,7 @@ import dependency_injector.providers as providers
 from PySide2.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 
-class CategoricalImagesFormatWidget(QWidget):
+class CategoricalImagesWidget(QWidget):
     def __init__(self, parent: "QWidget" = None):
         super().__init__(parent)
 
@@ -14,4 +14,4 @@ class CategoricalImagesFormatWidget(QWidget):
         self.setLayout(self._main_layout)
 
 
-CategoricalImagesFormatWidgetFactory = providers.Factory(CategoricalImagesFormatWidget)
+CategoricalImagesWidgetFactory = providers.Factory(CategoricalImagesWidget)

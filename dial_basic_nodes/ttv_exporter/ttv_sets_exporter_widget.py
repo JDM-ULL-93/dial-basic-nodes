@@ -2,7 +2,7 @@
 
 import dependency_injector.providers as providers
 
-from dial_core.datasets.io import TTVSetsFormatsContainer
+from dial_core.datasets.io import DatasetIOContainer
 from dial_core.utils import log
 
 from PySide2.QtWidgets import (
@@ -54,7 +54,7 @@ class TTVSetsExporterWidget(QWidget):
         self._ttv_info_layout.addRow("Export Path:", self._export_path_layout)
 
         self._format_combobox = QComboBox()
-        for io_format in TTVSetsFormatsContainer.providers.values():
+        for io_format in DatasetIOContainer.providers.values():
             self._format_combobox.addItem(io_format.cls.__name__, io_format)
         self._ttv_info_layout.addRow("Format", self._format_combobox)
 

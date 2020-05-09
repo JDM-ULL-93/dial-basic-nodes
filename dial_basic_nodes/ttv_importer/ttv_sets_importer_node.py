@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import dependency_injector.providers as providers
 
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import TTVSetsFormatsContainer, TTVSetsIO
+from dial_core.datasets.io import DatasetIOContainer, TTVSetsIO
 from dial_core.node_editor import Node
 from dial_core.utils import find_parent_of, log
 from dial_gui.project import ProjectGUI
@@ -44,7 +44,7 @@ class TTVSetsImporterNode(Node):
             return
 
         TTVSetsIO.save(
-            TTVSetsFormatsContainer.NpzFormat(), project_dir, ttv,
+            DatasetIOContainer.NpzFormat(), project_dir, ttv,
         )
 
         LOGGER.debug(f"TTV Saved on cached directory {project_dir}")
