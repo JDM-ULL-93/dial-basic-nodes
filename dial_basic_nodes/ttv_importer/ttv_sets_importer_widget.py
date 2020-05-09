@@ -2,11 +2,12 @@
 
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import DatasetIOContainer
+from dial_core.datasets.io import DatasetIORegistrySingleton
 from dial_core.utils import log
 from PySide2.QtCore import QSize, Signal
 from PySide2.QtWidgets import (
     QComboBox,
+    QFormLayout,
     QFrame,
     QHBoxLayout,
     QLineEdit,
@@ -23,11 +24,11 @@ from .ttv_sets_list import PredefinedTTVSetsListDialogFactory, TTVSetsListDialog
 LOGGER = log.get_logger(__name__)
 
 FORMAT_TO_WIDGET = {
-    DatasetIOContainer.NpzDatasetIO: {
+    DatasetIORegistrySingleton().providers["NpzDatasetIO"]: {
         "name": "Npz Files",
         "widget_factory": NpzWidgetFactory,
     },
-    DatasetIOContainer.CategoricalImgDatasetIO: {
+    DatasetIORegistrySingleton().providers["CategoricalImgDatasetIO"]: {
         "name": "Categorical Images",
         "widget_factory": CategoricalImagesWidgetFactory,
     },
@@ -77,9 +78,12 @@ class TTVSetsImporterWidget(QWidget):
         datatypes_layout.addWidget(self._x_datatype_selector)
         datatypes_layout.addWidget(self._y_datatype_selector)
 
+        self._info_layout = QFormLayout()
+        self._info_layout.addRow("Name", self._name_textbox)
+        self._info_layout.addRow("Format", self._formatter_selector)
+
         self._main_layout = QVBoxLayout()
-        self._main_layout.addWidget(self._name_textbox)
-        self._main_layout.addWidget(self._formatter_selector)
+        self._main_layout.addLayout(self._info_layout)
         self._main_layout.addWidget(horizontal_line())
         self._main_layout.addWidget(self._stacked_widgets)
         self._main_layout.addWidget(horizontal_line())

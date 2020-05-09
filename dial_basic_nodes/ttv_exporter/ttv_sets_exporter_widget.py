@@ -1,31 +1,37 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+from typing import Optional
+
 import dependency_injector.providers as providers
-
-from dial_core.datasets.io import DatasetIOContainer
+from dial_core.datasets import TTVSets
+from dial_core.datasets.io import DatasetIORegistrySingleton, TTVSetsIO
 from dial_core.utils import log
-
 from PySide2.QtWidgets import (
-    QWidget,
+    QComboBox,
+    QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
-    QVBoxLayout,
-    QComboBox,
-    QFormLayout,
     QPushButton,
-    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
 )
 
 LOGGER = log.get_logger(__name__)
 
 
 class TTVSetsExporterWidget(QWidget):
-    def __init__(self, parent: "QWidget" = None):
+    def __init__(
+        self,
+        dataset_io_providers=DatasetIORegistrySingleton(),
+        parent: "QWidget" = None,
+    ):
         super().__init__(parent)
 
         # Components
         self._ttv: Optional["TTVSets"] = None
-        self._export_ttv_path = ""
+        self._dataset_io_providers = dataset_io_providers
 
         # Widgets
         self._name_textbox = QLineEdit("Unnamed TTV")
@@ -37,9 +43,11 @@ class TTVSetsExporterWidget(QWidget):
 
         self._export_path_textbox = QLineEdit()
         self._export_path_textbox.setReadOnly(True)
+        self._export_path_textbox.setPlaceholderText("Path...")
         self._export_path_button = QPushButton("Directory...")
 
         self._export_button = QPushButton("Export")
+        self._export_button.clicked.connect(self.export_ttv)
 
         self._ttv_info_layout = QFormLayout()
         self._ttv_info_layout.addRow("Name:", self._name_textbox)
@@ -50,12 +58,16 @@ class TTVSetsExporterWidget(QWidget):
         self._export_path_layout = QHBoxLayout()
         self._export_path_layout.addWidget(self._export_path_textbox)
         self._export_path_layout.addWidget(self._export_path_button)
+        self._export_path_button.clicked.connect(self.pick_ttv_parent_dir)
 
         self._ttv_info_layout.addRow("Export Path:", self._export_path_layout)
 
         self._format_combobox = QComboBox()
-        for io_format in DatasetIOContainer.providers.values():
-            self._format_combobox.addItem(io_format.cls.__name__, io_format)
+
+        for (name, dataset_io) in self._dataset_io_providers.providers.items():
+            print(name, dataset_io)
+            self._format_combobox.addItem(name, dataset_io)
+
         self._ttv_info_layout.addRow("Format", self._format_combobox)
 
         self._main_layout = QVBoxLayout()
@@ -71,12 +83,41 @@ class TTVSetsExporterWidget(QWidget):
 
         LOGGER.info(f"TTVSets added to Export: {ttv}")
 
-    def pick_export_path(self):
+    def pick_ttv_parent_dir(self):
         LOGGER.debug("Picking a directory to export...")
-        ttv_dir
+
+        ttv_parent_dir = QFileDialog.getExistingDirectory(self, "Directory to export")
+
+        self._export_path_textbox.setText(ttv_parent_dir)
+
+        if ttv_parent_dir:
+            LOGGER.info("%s selected", ttv_parent_dir)
+        else:
+            LOGGER.debug("Selection cancelled.")
+
+    def export_ttv(self):
+        if not self._export_path_textbox.text():
+            LOGGER.info("TTV export parent directory not set!")
+            return
+
+        if not self._ttv:
+            LOGGER.info("TTV not set!")
+            return
+
+        dataset_io = self._format_combobox.currentData()
+
+        LOGGER.debug("Using %s formatter...", dataset_io)
+
+        ttv_description = TTVSetsIO.save(
+            self._export_path_textbox.text(), dataset_io, self._ttv
+        )
+
+        LOGGER.info("TTV Exported to %s", self._export_path_textbox.text())
+        LOGGER.debug(ttv_description)
 
     def _update_labels_text(self):
         """Update the text labels to reflect the TTVSets information"""
+        self._name_textbox.setText(self._ttv.name)
         self._train_label.setText(f"{str(self._ttv.train if self._ttv else None)}")
         self._test_label.setText(f"{str(self._ttv.test if self._ttv else None)}")
         self._validation_label.setText(

@@ -28,7 +28,12 @@ class CategoricalWidget(QWidget):
         self.setLayout(self._main_layout)
 
     def update_categories_list(self):
-        categories = self._categories_textarea.toPlainText().split("\n")
+        categories = list(
+            filter(
+                lambda category: len(category) != 0,
+                self._categories_textarea.toPlainText().split("\n"),
+            )
+        )
         self._categorical_datatype.categories = categories
 
         print(categories)
