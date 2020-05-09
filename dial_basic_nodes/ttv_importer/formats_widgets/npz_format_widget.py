@@ -18,7 +18,7 @@ LOGGER = log.get_logger(__name__)
 class FileLoaderGroup(QGroupBox):
     def __init__(
         self,
-        title,
+        title: str,
         parent: "QWidget" = None,
         filter: str = "",
         pick_directories: bool = False,
@@ -34,7 +34,7 @@ class FileLoaderGroup(QGroupBox):
 
         self._pick_file_text = QLineEdit()
         self._pick_file_text.setReadOnly(True)
-        self._pick_file_text.setPlaceholderText(f"{title} path...")
+        self._pick_file_text.setPlaceholderText("Path...")
         self._pick_file_button = QPushButton("Load")
 
         self._pick_file_layout = QHBoxLayout()
