@@ -9,6 +9,7 @@ from PySide2.QtWidgets import (
     QComboBox,
     QFrame,
     QHBoxLayout,
+    QLineEdit,
     QPushButton,
     QStackedWidget,
     QVBoxLayout,
@@ -34,7 +35,7 @@ FORMAT_TO_WIDGET = {
 
 
 class TTVSetsImporterWidget(QWidget):
-    ttv_loaded = Signal(TTVSets)
+    ttv_updated = Signal(TTVSets)
 
     def __init__(
         self,
@@ -44,10 +45,15 @@ class TTVSetsImporterWidget(QWidget):
     ):
         super().__init__(parent)
 
+        # Components
+        self._ttv = None
+
         # Maps a  with its respective Widget
         self._format_to_widget = format_to_widget
 
         self._stacked_widgets = QStackedWidget()
+
+        self._name_textbox = QLineEdit("Unnamed")
 
         self._formatter_selector = QComboBox()
         for (format_factory, widget_dict) in self._format_to_widget.items():
@@ -72,15 +78,16 @@ class TTVSetsImporterWidget(QWidget):
         datatypes_layout.addWidget(self._y_datatype_selector)
 
         self._main_layout = QVBoxLayout()
+        self._main_layout.addWidget(self._name_textbox)
         self._main_layout.addWidget(self._formatter_selector)
         self._main_layout.addWidget(horizontal_line())
         self._main_layout.addWidget(self._stacked_widgets)
         self._main_layout.addWidget(horizontal_line())
         self._main_layout.addLayout(datatypes_layout)
 
-        self.b = QPushButton("(Debug) To Dict")
-        self.b.clicked.connect(self._create_ttv_description)
-        self._main_layout.addWidget(self.b)
+        self._update_ttv_button = QPushButton("Update TTV")
+        self._update_ttv_button.clicked.connect(self._update_ttv)
+        self._main_layout.addWidget(self._update_ttv_button)
 
         self.setLayout(self._main_layout)
 
@@ -89,18 +96,16 @@ class TTVSetsImporterWidget(QWidget):
         )
 
     def get_ttv(self) -> "TTVSets":
-        return None
+        return self._ttv
 
-    def _create_ttv_description(self):
-        ttv_description = {
-            "description": {
-                "format": self._formatter_selector.currentText(),
-                "x_type": self._x_datatype_selector.to_dict(),
-                "y_type": self._y_datatype_selector.to_dict(),
-            },
-            **self._stacked_widgets.currentWidget().to_dict(),
-        }
-        print(ttv_description)
+    def _update_ttv(self):
+        self._ttv = self._stacked_widgets.currentWidget().load_ttv(
+            self._name_textbox.text(),
+            self._x_datatype_selector.selected_datatype,
+            self._y_datatype_selector.selected_datatype,
+        )
+
+        self.ttv_updated.emit(self._ttv)
 
     def _selected_index_changed(self, index: int):
         self._stacked_widgets.setCurrentIndex(index)

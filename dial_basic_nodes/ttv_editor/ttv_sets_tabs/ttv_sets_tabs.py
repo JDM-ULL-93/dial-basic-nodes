@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING, Optional
 
 import dependency_injector.providers as providers
-from dial_core.datasets import Dataset
 from PySide2.QtWidgets import QTabWidget
 
 from dial_basic_nodes.utils.dataset_table import DatasetTableWidgetFactory

@@ -1,24 +1,37 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-from typing import TYPE_CHECKING
-
 import dependency_injector.providers as providers
-from PySide2.QtWidgets import QListWidget
-
-if TYPE_CHECKING:
-    from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QLabel, QPlainTextEdit, QVBoxLayout, QWidget
 
 
-class CategoricalWidget(QListWidget):
+class CategoricalWidget(QWidget):
     def __init__(self, categorical_datatype, parent: "QWidget" = None):
         super().__init__(parent)
 
+        self._main_layout = QVBoxLayout()
+
+        # Components
         self._categorical_datatype = categorical_datatype
 
-        for category in self._categorical_datatype.categories:
-            self.addItem(category)
+        # Widgets
+        self._categories_textarea = QPlainTextEdit()
 
-        print("Categorical")
+        self._main_layout.addWidget(self._categories_textarea)
+        self._main_layout.addWidget(QLabel("One category per row"))
+
+        self._categories_textarea.setPlainText(
+            "\n".join(self._categorical_datatype.categories)
+        )
+
+        self._categories_textarea.textChanged.connect(self.update_categories_list)
+
+        self.setLayout(self._main_layout)
+
+    def update_categories_list(self):
+        categories = self._categories_textarea.toPlainText().split("\n")
+        self._categorical_datatype.categories = categories
+
+        print(categories)
 
 
 CategoricalWidgetFactory = providers.Factory(CategoricalWidget)

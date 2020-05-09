@@ -83,8 +83,8 @@ class ModelTableView(QTableView):
     def contextMenuEvent(self, event: "QContextMenuEvent"):
         menu = QMenu(self)
 
-        menu.popup(event.globalPos())
         menu.addAction("Remove layer", lambda: self.deleteSelectedRows())
+        menu.popup(event.globalPos())
 
     def deleteSelectedRows(self):
         # When a row is deleted, the new row index is the last row index - 1

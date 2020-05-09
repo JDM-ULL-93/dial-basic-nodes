@@ -27,3 +27,4 @@ class DatasetTableView(QTableView):
 
 
 DatasetTableViewFactory = providers.Factory(DatasetTableView)
+DatasetTableViewFactory = providers.Factory(DatasetTableView)
