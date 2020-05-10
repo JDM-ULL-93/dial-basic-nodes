@@ -4,7 +4,7 @@ import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
 from dial_core.datasets.io import DatasetIORegistrySingleton, TTVSetsIO
 from dial_core.utils import log
-from PySide2.QtCore import QSize, Qt, Signal
+from PySide2.QtCore import QSize, Signal
 from PySide2.QtWidgets import (
     QComboBox,
     QDialogButtonBox,
@@ -21,7 +21,6 @@ from PySide2.QtWidgets import (
 
 from .datatype_selector import DatatypeSelectorFactory
 from .formats_widgets import CategoricalImagesWidgetFactory, NpzWidgetFactory
-from .ttv_sets_list import PredefinedTTVSetsListDialogFactory, TTVSetsListDialog
 
 LOGGER = log.get_logger(__name__)
 
@@ -37,10 +36,7 @@ class TTVSetsImporterWidget(QWidget):
     ttv_updated = Signal(TTVSets)
 
     def __init__(
-        self,
-        ttv_sets_dialog: "TTVSetsListDialog",
-        format_to_widget,
-        parent: "QWidget" = None,
+        self, format_to_widget, parent: "QWidget" = None,
     ):
         super().__init__(parent)
 
@@ -168,7 +164,5 @@ class TTVSetsImporterWidget(QWidget):
 
 
 TTVSetsImporterWidgetFactory = providers.Factory(
-    TTVSetsImporterWidget,
-    ttv_sets_dialog=PredefinedTTVSetsListDialogFactory,
-    format_to_widget=FORMAT_TO_WIDGET,
+    TTVSetsImporterWidget, format_to_widget=FORMAT_TO_WIDGET,
 )

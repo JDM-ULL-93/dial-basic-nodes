@@ -24,6 +24,11 @@ from .predefined_models import (
     PredefinedModelsNodeCells,
     PredefinedModelsNodeFactory,
 )
+from .predefined_ttv import (
+    PredefinedTTVSetsNode,
+    PredefinedTTVSetsNodeCells,
+    PredefinedTTVSetsNodeFactory,
+)
 from .test_model import TestModelNode, TestModelNodeCells, TestModelNodeFactory
 from .training_console import (
     TrainingConsoleNode,
@@ -66,6 +71,7 @@ def load_plugin():
     node_registry.register_node("Datasets/TTV Exporter", TTVSetsExporterNodeFactory)
     node_registry.register_node("Datasets/TTV Splitter", TTVSetsSplitterNodeFactory)
     node_registry.register_node("Datasets/TTV Merger", TTVSetsMergerNodeFactory)
+    node_registry.register_node("Datasets/Predefined TTV", PredefinedTTVSetsNodeFactory)
     node_registry.register_node("Models/Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Models/Predefined Models", PredefinedModelsNodeFactory)
     node_registry.register_node(
@@ -98,6 +104,9 @@ def load_plugin():
     node_cells_registry.register_transformer(
         PredefinedModelsNode, PredefinedModelsNodeCells
     )
+    node_cells_registry.register_transformer(
+        PredefinedTTVSetsNode, PredefinedTTVSetsNodeCells
+    )
 
 
 def unload_plugin():
@@ -109,6 +118,7 @@ def unload_plugin():
     node_registry.unregister_node("Datasets/TTV Exporter")
     node_registry.unregister_node("Datasets/TTV Splitter")
     node_registry.unregister_node("Datasets/TTV Merger")
+    node_registry.unregister_node("Datasets/Predefined TTV")
     node_registry.unregister_node("Models/Layers Editor")
     node_registry.unregister_node("Models/Predefined Models")
     node_registry.unregister_node("Training/Hyperparameters Config")
@@ -122,11 +132,12 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(TTVSetsExporterNodeCells)
     node_cells_registry.unregister_transformer(TTVSetsSplitterNodeCells)
     node_cells_registry.unregister_transformer(TTVSetsMergerNodeCells)
-    node_cells_registry.unregister_transformer(HyperparametersConfigNode)
-    node_cells_registry.unregister_transformer(LayersEditorNode)
-    node_cells_registry.unregister_node(PredefinedModelsNode)
-    node_cells_registry.unregister_transformer(TrainingConsoleNode)
-    node_cells_registry.unregister_transformer(TestModelNode)
+    node_cells_registry.unregister_transformer(PredefinedTTVSetsNodeCells)
+    node_cells_registry.unregister_transformer(HyperparametersConfigNodeCells)
+    node_cells_registry.unregister_transformer(LayersEditorNodeCells)
+    node_cells_registry.unregister_transformer(PredefinedModelsNodeCells)
+    node_cells_registry.unregister_transformer(TrainingConsoleNodeCells)
+    node_cells_registry.unregister_transformer(TestModelNodeCells)
 
 
 __all__ = [
