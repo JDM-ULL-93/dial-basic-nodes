@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING, List, Optional
 
+from dial_core.utils import Dial
 from PySide2.QtCore import (
     QByteArray,
     QDataStream,
@@ -13,7 +14,6 @@ from PySide2.QtCore import (
 from tensorflow import keras
 
 from .abstract_tree_model import AbstractTreeModel, AbstractTreeNode
-from dial_core.utils import Dial
 
 if TYPE_CHECKING:
     from PySide2.QtWidgets import QWidget
@@ -63,8 +63,8 @@ class LayersTreeModel(AbstractTreeModel):
         return 1
 
     def setup_model_data(self):
-        basic_layers = TitleNode("Basic Layers")
-        basic_layers.append(
+        core_layers = TitleNode("Core Layers")
+        core_layers.append(
             LayerNode("Dense", keras.layers.Dense(10), layer_name="dense")
         )
 
@@ -90,8 +90,58 @@ class LayersTreeModel(AbstractTreeModel):
             )
         )
 
-        self.root_node.append(basic_layers)
+        convolutional_layers = TitleNode("Convolutional Layers")
+        convolutional_layers.append(
+            LayerNode("Conv1D", keras.layers.Conv1D(32, 3), layer_name="conv1d")
+        )
+        convolutional_layers.append(
+            LayerNode("Conv2D", keras.layers.Conv2D(32, 3), layer_name="conv2d")
+        )
+        convolutional_layers.append(
+            LayerNode("Conv3D", keras.layers.Conv3D(32, 3), layer_name="conv3d")
+        )
+
+        pooling_layers = TitleNode("Pooling Layers")
+        pooling_layers.append(
+            LayerNode(
+                "MaxPooling1D", keras.layers.MaxPooling1D(), layer_name="max_pool_1d"
+            )
+        )
+        pooling_layers.append(
+            LayerNode(
+                "MaxPooling2D", keras.layers.MaxPooling2D(), layer_name="max_pool_2d"
+            )
+        )
+        pooling_layers.append(
+            LayerNode(
+                "MaxPooling3D", keras.layers.MaxPooling3D(), layer_name="max_pool_3d"
+            )
+        )
+
+        normalization_layers = TitleNode("Normalization Layers")
+        normalization_layers.append(
+            LayerNode("Dropout", keras.layers.Dropout(0.5), layer_name="dropout")
+        )
+        normalization_layers.append(
+            LayerNode(
+                "BatchNormalization",
+                keras.layers.BatchNormalization(),
+                layer_name="batch_norm",
+            )
+        )
+        normalization_layers.append(
+            LayerNode(
+                "LayerNormalization",
+                keras.layers.LayerNormalization(),
+                layer_name="layer_norm",
+            )
+        )
+
+        self.root_node.append(core_layers)
         self.root_node.append(activation_layers)
+        self.root_node.append(convolutional_layers)
+        self.root_node.append(pooling_layers)
+        self.root_node.append(normalization_layers)
 
     def flags(self, index: "QModelIndex"):
         """
