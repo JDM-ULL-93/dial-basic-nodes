@@ -63,9 +63,8 @@ class TTVSetsExporterWidget(QWidget):
 
         self._format_combobox = QComboBox()
 
-        for (name, dataset_io) in self._dataset_io_providers.providers.items():
-            print(name, dataset_io)
-            self._format_combobox.addItem(name, dataset_io)
+        for (name, dataset_io_factory) in self._dataset_io_providers.providers.items():
+            self._format_combobox.addItem(name, dataset_io_factory())
 
         self._ttv_info_layout.addRow("Format", self._format_combobox)
 

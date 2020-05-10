@@ -1,5 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import os
 import re
 
 import dependency_injector.providers as providers
@@ -84,11 +85,11 @@ class CategoricalImagesWidget(QWidget):
         self._category_regex_textbox.textChanged.connect(lambda: self._reload_regex())
         self._regex_test_input_textbox.textChanged.connect(lambda: self._reload_regex())
         self._organization_combobox.currentIndexChanged[int].connect(
-            self._update_widgets
+            lambda: self._update_organization_widgets()
         )
 
         self._reload_regex()
-        self._update_widgets(self._organization_combobox.currentIndex())
+        self._update_organization_widgets()
 
     def load_ttv(self, name: str, x_type: DataType, y_type: DataType):
         LOGGER.debug("Loading TTV %s", name)
@@ -127,8 +128,31 @@ class CategoricalImagesWidget(QWidget):
         else:
             self._regex_test_output_textbox.setText("[No match]")
 
-    def _update_widgets(self, current_widget_index: int):
-        if current_widget_index == 1:
+    def update_widgets(self, ttv_dir: str, ttv_description: dict):
+        def update_file_loader_path(dir_loader, dataset_dir, dataset_description):
+            if not dataset_dir:
+                dir_loader.path = ""
+                return
+
+            if self._organization_combobox.currentIndex() == 0:
+                dataset_dir_path = os.path.join(ttv_dir, dataset_dir)
+            else:
+                dataset_dir_path = ttv_dir
+
+            dir_loader.path = dataset_dir_path
+
+        update_file_loader_path(
+            self._train_dir_loader, "train", ttv_description["train"]
+        )
+        update_file_loader_path(self._test_dir_loader, "test", ttv_description["test"])
+        update_file_loader_path(
+            self._validation_dir_loader, "validation", ttv_description["validation"]
+        )
+
+        self._update_organization_widgets()
+
+    def _update_organization_widgets(self):
+        if self._organization_combobox.currentIndex() == 1:
             self._category_regex_extractor_group.setVisible(True)
         else:
             self._category_regex_extractor_group.setVisible(False)
