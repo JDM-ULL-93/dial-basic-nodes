@@ -5,7 +5,7 @@ import os
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
 from dial_core.datasets.datatype import DataType
-from dial_core.datasets.io import NpzDatasetIOBuilder, TTVSetsIO
+from dial_core.datasets.io import NpzDatasetIO, TTVSetsIO
 from dial_core.utils import log
 from PySide2.QtWidgets import (
     QFileDialog,
@@ -91,49 +91,36 @@ class NpzWidget(QWidget):
     def load_ttv(self, name: str, x_type: DataType, y_type: DataType):
         LOGGER.debug("Loading TTV %s", name)
 
-        train = self._load_dataset(
-            "train", self._train_file_loader.path, x_type, y_type
-        )
-        test = self._load_dataset("test", self._test_file_loader.path, x_type, y_type)
-        validation = self._load_dataset(
-            "validation", self._validation_file_loader.path, x_type, y_type
-        )
+        def load_dataset(filename):
+            return (
+                NpzDatasetIO()
+                .set_x_type(x_type)
+                .set_y_type(y_type)
+                .set_filename(filename)
+                .load(parent_dir="")  # Absolute path set on filename
+            )
+
+        train = load_dataset(self._train_file_loader.path)
+        test = load_dataset(self._test_file_loader.path)
+        validation = load_dataset(self._validation_file_loader.path)
 
         return TTVSets(name, train, test, validation)
 
-    def load_ttv_from_description(self, ttv_dir: str, ttv_description):
-        try:
-            self._train_file_loader.path = os.path.join(
-                ttv_dir, "train", ttv_description["train"]["filename"]
-            )
-        except KeyError:
-            pass
+    def update_widgets(self, ttv_dir: str, ttv_description: dict):
+        def update_file_loader_path(file_loader, dataset_dir, dataset_description):
+            if "filename" in dataset_description:
+                file_loader.path = os.path.join(
+                    ttv_dir, dataset_dir, dataset_description["filename"]
+                )
+            else:
+                file_loader.path = ""
 
-        try:
-            self._test_file_loader.path = os.path.join(
-                ttv_dir, "test", ttv_description["test"]["filename"]
-            )
-        except KeyError:
-            pass
-
-        try:
-            self._validation_file_loader.path = os.path.join(
-                ttv_dir, "validation", ttv_description["validation"]["filename"]
-            )
-        except KeyError:
-            pass
-
-        return TTVSetsIO.load_ttv_from_description(ttv_dir, ttv_description)
-
-    def _load_dataset(
-        self, dataset_dir: str, filename_path: str, x_type: DataType, y_type: DataType
-    ):
-        return (
-            NpzDatasetIOBuilder()
-            .set_x_type(x_type)
-            .set_y_type(y_type)
-            .set_filename(filename_path)
-            .load("")
+        update_file_loader_path(
+            self._train_file_loader, "train", ttv_description["train"]
+        )
+        update_file_loader_path(self._test_file_loader, "test", ttv_description["test"])
+        update_file_loader_path(
+            self._validation_file_loader, "validation", ttv_description["validation"]
         )
 
 

@@ -1,10 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import os
 from typing import Optional
 
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import DatasetIORegistrySingleton, TTVSetsIO
+from dial_core.datasets.io import DatasetIORegistry, TTVSetsIO
 from dial_core.utils import log
 from PySide2.QtWidgets import (
     QComboBox,
@@ -23,9 +24,7 @@ LOGGER = log.get_logger(__name__)
 
 class TTVSetsExporterWidget(QWidget):
     def __init__(
-        self,
-        dataset_io_providers=DatasetIORegistrySingleton(),
-        parent: "QWidget" = None,
+        self, dataset_io_providers=DatasetIORegistry, parent: "QWidget" = None,
     ):
         super().__init__(parent)
 
@@ -106,15 +105,17 @@ class TTVSetsExporterWidget(QWidget):
 
         self._ttv.name = self._name_textbox.text()
 
-        dataset_io = self._format_combobox.currentData()
+        ttv_dir = self._export_path_textbox.text()
+        description_file_path = os.path.join(ttv_dir, "ttv_description.json")
 
+        dataset_io = self._format_combobox.currentData()
         LOGGER.debug("Using %s formatter...", dataset_io)
 
-        ttv_description = TTVSetsIO.save(
-            self._export_path_textbox.text(), dataset_io, self._ttv
+        ttv_description = TTVSetsIO.save_to_file(
+            description_file_path, dataset_io, self._ttv
         )
 
-        LOGGER.info("TTV Exported to %s", self._export_path_textbox.text())
+        LOGGER.info("TTV Exported to %s", description_file_path)
         LOGGER.debug(ttv_description)
 
     def _update_labels_text(self):
