@@ -4,8 +4,8 @@ from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import dependency_injector.providers as providers
-from PySide2.QtCore import QSize, Qt, Signal
-from PySide2.QtWidgets import QDockWidget, QMainWindow
+from PySide2.QtCore import QSize, Signal
+from PySide2.QtWidgets import QHBoxLayout, QSizePolicy, QWidget
 from tensorflow.keras.models import Sequential
 
 from .layers_tree import LayersTreeWidgetFactory
@@ -14,10 +14,9 @@ from .model_table import ModelTableWidgetFactory
 if TYPE_CHECKING:
     from .layers_tree import LayersTreeWidget
     from .model_table import ModelTableWidget
-    from PySide2.QtWidgets import QWidget
 
 
-class LayersEditorWidget(QMainWindow):
+class LayersEditorWidget(QWidget):
     """
     Window for all the model related operations (Create/Modify NN architectures)
     """
@@ -32,24 +31,38 @@ class LayersEditorWidget(QMainWindow):
     ):
         super().__init__(parent)
 
-        # Initialize widgets
-        self.__model_table = model_table
-        self.__model_table.setParent(self)
+        # Initialize Widgets
+        self._layers_tree = layers_tree
+        self._layers_tree.setParent(self)
 
-        self.__layers_tree = layers_tree
-        self.__layers_tree.setParent(self)
+        self._model_table = model_table
+        self._model_table.setParent(self)
 
-        self.__dock_layers_tree = QDockWidget(self)
+        # Configure Layout
+        self._main_layout = QHBoxLayout()
+        self._main_layout.setContentsMargins(0, 0, 0, 0)
+        self._main_layout.addWidget(self._layers_tree)
+        self._main_layout.addWidget(self._model_table)
 
-        # Configure interface
-        self.__setup_ui()
+        sp_left = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sp_left.setHorizontalStretch(1.3)
 
-        self.__model_table.layers_modified.connect(lambda: self.layers_modified.emit())
+        self._layers_tree.setSizePolicy(sp_left)
+
+        sp_mid = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sp_mid.setHorizontalStretch(3)
+
+        self._model_table.setSizePolicy(sp_mid)
+
+        self.setLayout(self._main_layout)
+
+        # Setup connections
+        self._model_table.layers_modified.connect(lambda: self.layers_modified.emit())
 
     def get_model(self):
         model = Sequential()
 
-        for layer in self.__model_table.layers:
+        for layer in self._model_table.layers:
             model.add(layer)
 
         return deepcopy(model)
@@ -57,19 +70,8 @@ class LayersEditorWidget(QMainWindow):
     def sizeHint(self) -> "QSize":
         return QSize(600, 300)
 
-    def __setup_ui(self):
-        # Configure dock widget with layers tree
-        self.__dock_layers_tree.setWidget(self.__layers_tree)
-        self.__dock_layers_tree.setFeatures(
-            QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable
-        )
-
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.__dock_layers_tree)
-
-        self.setCentralWidget(self.__model_table)
-
     def __reduce__(self):
-        return (LayersEditorWidget, (self.__layers_tree, self.__model_table))
+        return (LayersEditorWidget, (self._layers_tree, self._model_table))
 
 
 LayersEditorWidgetFactory = providers.Factory(

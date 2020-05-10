@@ -143,6 +143,21 @@ class LayersTreeModel(AbstractTreeModel):
         self.root_node.append(pooling_layers)
         self.root_node.append(normalization_layers)
 
+    def headerData(
+        self, section: int, orientation: "Qt.Orientation", role=Qt.DisplayRole
+    ):
+        """Returns the name of the headers."""
+
+        if role != Qt.DisplayRole:
+            return None
+
+        # Column header must have their respective names
+        if orientation == Qt.Horizontal:
+            if section == 0:
+                return "Layers"
+
+        return None
+
     def flags(self, index: "QModelIndex"):
         """
         Flag items depending on its type.
