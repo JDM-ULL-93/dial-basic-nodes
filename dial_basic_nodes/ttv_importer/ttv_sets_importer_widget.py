@@ -91,7 +91,7 @@ class TTVSetsImporterWidget(QWidget):
         self._load_ttv_from_file_button = QPushButton("Load from file...")
         self._load_ttv_from_file_button.clicked.connect(self._load_ttv_from_file)
 
-        self._update_ttv_button = QPushButton("Update TTV")
+        self._update_ttv_button = QPushButton("Load TTV")
         self._update_ttv_button.clicked.connect(self._update_ttv)
 
         self._button_box = QDialogButtonBox()

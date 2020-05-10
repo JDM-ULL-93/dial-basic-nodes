@@ -38,19 +38,24 @@ class CategoricalImagesWidget(QWidget):
 
         self._organization_combobox = QComboBox()
         self._organization_combobox.addItem(
-            "Extract Category from Folders",
+            "Use Folder name as category",
             CategoricalImgDatasetIO.Organization.CategoryOnFolders,
         )
         self._organization_combobox.addItem(
-            "Extract Category from Filename",
+            "Use Filename as category",
             CategoricalImgDatasetIO.Organization.CategoryOnFilename,
+        )
+
+        self._category_regex_extractor_group = QGroupBox("Category Extractor Regex")
+        self._category_regex_extractor_layout = QVBoxLayout()
+        self._category_regex_extractor_group.setLayout(
+            self._category_regex_extractor_layout
         )
 
         self._category_regex_textbox = QLineEdit("(.*)")
         self._category_regex_layout = QFormLayout()
         self._category_regex_layout.addRow(
-            "Regex for extracting the category from filename",
-            self._category_regex_textbox,
+            "Regex:", self._category_regex_textbox,
         )
 
         self._regex_test_input_textbox = QLineEdit()
@@ -58,12 +63,13 @@ class CategoricalImagesWidget(QWidget):
         self._regex_test_output_textbox.setReadOnly(True)
 
         self._regex_test_layout = QHBoxLayout()
-        self._regex_test_layout.addWidget(QLabel("Test: (Input)"))
+        self._regex_test_layout.addWidget(QLabel("Test: (Filename) "))
         self._regex_test_layout.addWidget(self._regex_test_input_textbox)
-        self._regex_test_layout.addWidget(QLabel(" => Output: "))
+        self._regex_test_layout.addWidget(QLabel(" => (Category): "))
         self._regex_test_layout.addWidget(self._regex_test_output_textbox)
 
-        self._options_groupbox = QGroupBox()
+        self._category_regex_extractor_layout.addLayout(self._category_regex_layout)
+        self._category_regex_extractor_layout.addLayout(self._regex_test_layout)
 
         self._main_layout = QVBoxLayout()
         self._main_layout.setContentsMargins(0, 0, 0, 0)
@@ -71,15 +77,18 @@ class CategoricalImagesWidget(QWidget):
         self._main_layout.addWidget(self._test_dir_loader)
         self._main_layout.addWidget(self._validation_dir_loader)
         self._main_layout.addWidget(self._organization_combobox)
-        self._main_layout.addLayout(self._category_regex_layout)
-        self._main_layout.addLayout(self._regex_test_layout)
+        self._main_layout.addWidget(self._category_regex_extractor_group)
 
         self.setLayout(self._main_layout)
 
         self._category_regex_textbox.textChanged.connect(lambda: self._reload_regex())
         self._regex_test_input_textbox.textChanged.connect(lambda: self._reload_regex())
+        self._organization_combobox.currentIndexChanged[int].connect(
+            self._update_widgets
+        )
 
         self._reload_regex()
+        self._update_widgets(self._organization_combobox.currentIndex())
 
     def load_ttv(self, name: str, x_type: DataType, y_type: DataType):
         LOGGER.debug("Loading TTV %s", name)
@@ -117,6 +126,12 @@ class CategoricalImagesWidget(QWidget):
                 self._regex_test_output_textbox.setText(match.group(0))
         else:
             self._regex_test_output_textbox.setText("[No match]")
+
+    def _update_widgets(self, current_widget_index: int):
+        if current_widget_index == 1:
+            self._category_regex_extractor_group.setVisible(True)
+        else:
+            self._category_regex_extractor_group.setVisible(False)
 
 
 CategoricalImagesWidgetFactory = providers.Factory(CategoricalImagesWidget)
