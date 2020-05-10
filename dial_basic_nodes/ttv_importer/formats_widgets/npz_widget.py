@@ -1,10 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import os
+
 import dependency_injector.providers as providers
-import numpy as np
 from dial_core.datasets import TTVSets
 from dial_core.datasets.datatype import DataType
-from dial_core.datasets.io import NpzDatasetIOBuilder
+from dial_core.datasets.io import NpzDatasetIOBuilder, TTVSetsIO
 from dial_core.utils import log
 from PySide2.QtWidgets import (
     QFileDialog,
@@ -99,6 +100,30 @@ class NpzWidget(QWidget):
         )
 
         return TTVSets(name, train, test, validation)
+
+    def load_ttv_from_description(self, ttv_dir: str, ttv_description):
+        try:
+            self._train_file_loader.path = os.path.join(
+                ttv_dir, "train", ttv_description["train"]["filename"]
+            )
+        except KeyError:
+            pass
+
+        try:
+            self._test_file_loader.path = os.path.join(
+                ttv_dir, "test", ttv_description["test"]["filename"]
+            )
+        except KeyError:
+            pass
+
+        try:
+            self._validation_file_loader.path = os.path.join(
+                ttv_dir, "validation", ttv_description["validation"]["filename"]
+            )
+        except KeyError:
+            pass
+
+        return TTVSetsIO.load_ttv_from_description(ttv_dir, ttv_description)
 
     def _load_dataset(
         self, dataset_dir: str, filename_path: str, x_type: DataType, y_type: DataType

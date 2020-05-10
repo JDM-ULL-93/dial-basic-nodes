@@ -19,9 +19,7 @@ class CategoricalWidget(QWidget):
         self._main_layout.addWidget(self._categories_textarea)
         self._main_layout.addWidget(QLabel("One category per row"))
 
-        self._categories_textarea.setPlainText(
-            "\n".join(self._categorical_datatype.categories)
-        )
+        self.reload()
 
         self._categories_textarea.textChanged.connect(self.update_categories_list)
 
@@ -37,6 +35,11 @@ class CategoricalWidget(QWidget):
         self._categorical_datatype.categories = categories
 
         print(categories)
+
+    def reload(self):
+        self._categories_textarea.setPlainText(
+            "\n".join(self._categorical_datatype.categories)
+        )
 
 
 CategoricalWidgetFactory = providers.Factory(CategoricalWidget)

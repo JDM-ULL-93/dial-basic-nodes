@@ -104,6 +104,8 @@ class TTVSetsExporterWidget(QWidget):
             LOGGER.info("TTV not set!")
             return
 
+        self._ttv.name = self._name_textbox.text()
+
         dataset_io = self._format_combobox.currentData()
 
         LOGGER.debug("Using %s formatter...", dataset_io)

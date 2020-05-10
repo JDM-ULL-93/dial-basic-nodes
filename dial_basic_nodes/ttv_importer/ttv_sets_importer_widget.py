@@ -2,11 +2,13 @@
 
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import DatasetIORegistrySingleton
+from dial_core.datasets.io import DatasetIORegistrySingleton, TTVSetsIO
 from dial_core.utils import log
-from PySide2.QtCore import QSize, Signal
+from PySide2.QtCore import QSize, Qt, Signal
 from PySide2.QtWidgets import (
     QComboBox,
+    QDialogButtonBox,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QHBoxLayout,
@@ -24,14 +26,10 @@ from .ttv_sets_list import PredefinedTTVSetsListDialogFactory, TTVSetsListDialog
 LOGGER = log.get_logger(__name__)
 
 FORMAT_TO_WIDGET = {
-    DatasetIORegistrySingleton().providers["NpzDatasetIO"]: {
-        "name": "Npz Files",
-        "widget_factory": NpzWidgetFactory,
-    },
-    DatasetIORegistrySingleton().providers["CategoricalImgDatasetIO"]: {
-        "name": "Categorical Images",
-        "widget_factory": CategoricalImagesWidgetFactory,
-    },
+    DatasetIORegistrySingleton().providers["NpzDatasetIO"]: NpzWidgetFactory,
+    DatasetIORegistrySingleton().providers[
+        "CategoricalImgDatasetIO"
+    ]: CategoricalImagesWidgetFactory,
 }
 
 
@@ -57,11 +55,9 @@ class TTVSetsImporterWidget(QWidget):
         self._name_textbox = QLineEdit("Unnamed")
 
         self._formatter_selector = QComboBox()
-        for (format_factory, widget_dict) in self._format_to_widget.items():
-            self._formatter_selector.addItem(widget_dict["name"], format_factory)
-            self._stacked_widgets.addWidget(
-                self._format_to_widget[format_factory]["widget_factory"]()
-            )
+        for (dataset_io, widget_factory) in self._format_to_widget.items():
+            self._formatter_selector.addItem(dataset_io.__name__, dataset_io)
+            self._stacked_widgets.addWidget(self._format_to_widget[dataset_io]())
 
         def horizontal_line():
             line = QFrame()
@@ -89,9 +85,19 @@ class TTVSetsImporterWidget(QWidget):
         self._main_layout.addWidget(horizontal_line())
         self._main_layout.addLayout(datatypes_layout)
 
+        self._load_ttv_from_file_button = QPushButton("Load from file...")
+        self._load_ttv_from_file_button.clicked.connect(self._load_ttv_from_file)
+
         self._update_ttv_button = QPushButton("Update TTV")
         self._update_ttv_button.clicked.connect(self._update_ttv)
-        self._main_layout.addWidget(self._update_ttv_button)
+
+        self._button_box = QDialogButtonBox()
+        self._button_box.addButton(
+            self._load_ttv_from_file_button, QDialogButtonBox.ResetRole
+        )
+        self._button_box.addButton(self._update_ttv_button, QDialogButtonBox.ApplyRole)
+
+        self._main_layout.addWidget(self._button_box)
 
         self.setLayout(self._main_layout)
 
@@ -110,6 +116,42 @@ class TTVSetsImporterWidget(QWidget):
         )
 
         self.ttv_updated.emit(self._ttv)
+
+    def _load_ttv_from_file(self):
+        print("Loading from file...")
+
+        ttv_dir = QFileDialog.getExistingDirectory(self, "Open TTV Directory")
+
+        if ttv_dir:
+            LOGGER.debug("Loading %s...", ttv_dir)
+
+            ttv_description = TTVSetsIO.get_ttv_description(ttv_dir)
+
+            # Update widgets with the description values
+
+            self._name_textbox.setText(ttv_description["name"])
+
+            formatter_idx = self._formatter_selector.findText(ttv_description["format"])
+            print(formatter_idx)
+
+            if formatter_idx != -1:
+                self._formatter_selector.setCurrentIndex(formatter_idx)
+                self._selected_index_changed(formatter_idx)
+
+            # TODO: Cover case when "train" is null
+            self._x_datatype_selector.change_current_datatype(
+                ttv_description["train"]["x_type"]
+            )
+            self._y_datatype_selector.change_current_datatype(
+                ttv_description["train"]["y_type"]
+            )
+
+            self._ttv = self._stacked_widgets.currentWidget().load_ttv_from_description(
+                ttv_dir, ttv_description
+            )
+
+        else:
+            LOGGER.debug("Loading cancelled")
 
     def _selected_index_changed(self, index: int):
         self._stacked_widgets.setCurrentIndex(index)

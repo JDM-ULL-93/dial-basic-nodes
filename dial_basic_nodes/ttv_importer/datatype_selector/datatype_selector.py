@@ -45,6 +45,14 @@ class DatatypeSelector(QGroupBox):
     def selected_datatype(self):
         return self._datatype_combobox.currentData()
 
+    def change_current_datatype(self, new_datatype_dict: dict):
+        index = self._datatype_combobox.findText(new_datatype_dict["class"])
+
+        if index != -1:
+            self._datatype_combobox.setCurrentIndex(index)
+            self._datatype_combobox.currentData().from_dict(new_datatype_dict)
+            self._stacked_widgets.currentWidget().reload()
+
     def _change_active_widget(self, index):
         self._stacked_widgets.setCurrentIndex(index)
 
