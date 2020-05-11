@@ -9,6 +9,11 @@ when working with classical Deep Learning problems.
 from dial_core.node_editor import NodeRegistrySingleton
 from dial_core.notebook import NodeCellsRegistrySingleton
 
+from .data_augmentation import (
+    DataAugmentationNode,
+    DataAugmentationNodeCells,
+    DataAugmentationNodeFactory,
+)
 from .hyperparameters_config import (
     HyperparametersConfigNode,
     HyperparametersConfigNodeCells,
@@ -69,9 +74,14 @@ def load_plugin():
     node_registry.register_node("Datasets/TTV Editor", TTVSetsEditorNodeFactory)
     node_registry.register_node("Datasets/TTV Importer", TTVSetsImporterNodeFactory)
     node_registry.register_node("Datasets/TTV Exporter", TTVSetsExporterNodeFactory)
-    node_registry.register_node("Datasets/TTV Splitter", TTVSetsSplitterNodeFactory)
-    node_registry.register_node("Datasets/TTV Merger", TTVSetsMergerNodeFactory)
-    node_registry.register_node("Datasets/Predefined TTV", PredefinedTTVSetsNodeFactory)
+    node_registry.register_node("Datasets/Split TTV", TTVSetsSplitterNodeFactory)
+    node_registry.register_node("Datasets/Merge TTV", TTVSetsMergerNodeFactory)
+    node_registry.register_node(
+        "Datasets/Data Augmentation", DataAugmentationNodeFactory
+    )
+    node_registry.register_node(
+        "Datasets/Predefined TTVs", PredefinedTTVSetsNodeFactory
+    )
     node_registry.register_node("Models/Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Models/Predefined Models", PredefinedModelsNodeFactory)
     node_registry.register_node(
@@ -93,6 +103,9 @@ def load_plugin():
         TTVSetsSplitterNode, TTVSetsSplitterNodeCells
     )
     node_cells_registry.register_transformer(TTVSetsMergerNode, TTVSetsMergerNodeCells)
+    node_cells_registry.register_transformer(
+        DataAugmentationNode, DataAugmentationNodeCells
+    )
     node_cells_registry.register_transformer(
         HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
@@ -116,9 +129,10 @@ def unload_plugin():
     node_registry.unregister_node("Datasets/TTV Editor")
     node_registry.unregister_node("Datasets/TTV Importer")
     node_registry.unregister_node("Datasets/TTV Exporter")
-    node_registry.unregister_node("Datasets/TTV Splitter")
-    node_registry.unregister_node("Datasets/TTV Merger")
-    node_registry.unregister_node("Datasets/Predefined TTV")
+    node_registry.unregister_node("Datasets/Split TTV")
+    node_registry.unregister_node("Datasets/Merge TTV")
+    node_registry.unregister_node("Datasets/Data Augmentation")
+    node_registry.unregister_node("Datasets/Predefined TTVs")
     node_registry.unregister_node("Models/Layers Editor")
     node_registry.unregister_node("Models/Predefined Models")
     node_registry.unregister_node("Training/Hyperparameters Config")
@@ -132,6 +146,7 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(TTVSetsExporterNodeCells)
     node_cells_registry.unregister_transformer(TTVSetsSplitterNodeCells)
     node_cells_registry.unregister_transformer(TTVSetsMergerNodeCells)
+    node_cells_registry.unregister_transformer(DataAugmentationNodeCells)
     node_cells_registry.unregister_transformer(PredefinedTTVSetsNodeCells)
     node_cells_registry.unregister_transformer(HyperparametersConfigNodeCells)
     node_cells_registry.unregister_transformer(LayersEditorNodeCells)
