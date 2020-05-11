@@ -1,8 +1,10 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import re
 from typing import Optional
 
 import dependency_injector.providers as providers
+import tensorflow as tf
 from dial_core.datasets import TTVSets
 from PySide2.QtWidgets import (
     QCheckBox,
@@ -32,6 +34,8 @@ class DataAugmentationOperationsColumn(QWidget):
         self._target_size_layout.addWidget(self._target_size_enabled)
         self._target_size_layout.addWidget(self._target_size_textbox)
 
+        self._target_size_operation = lambda im: tf.image.resize(im, self.target_size)
+
         self._target_size_group.setLayout(self._target_size_layout)
 
         self._target_size_enabled.stateChanged.connect(
@@ -44,11 +48,21 @@ class DataAugmentationOperationsColumn(QWidget):
 
     @property
     def target_size(self):
-        return self._target_size_textbox.text()
+        return tuple(
+            map(int, re.sub("[()]", "", self._target_size_textbox.text()).split(","))
+        )
 
     @target_size.setter
     def target_size(self, new_target_size: str):
-        self._target_size_textbox.setText(new_target_size)
+        tuple_string_list = re.sub("[()]", "", new_target_size).split(",")
+
+        processed_tuple = tuple(
+            [int(element) if element else None for element in tuple_string_list]
+        )
+
+        self._target_size_textbox.setText(str(processed_tuple))
+
+        print("TT", self.target_size)
 
 
 class DataAugmentationWidget(QWidget):
