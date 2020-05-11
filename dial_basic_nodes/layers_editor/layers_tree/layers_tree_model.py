@@ -68,6 +68,14 @@ class LayersTreeModel(AbstractTreeModel):
             LayerNode("Dense", keras.layers.Dense(10), layer_name="dense")
         )
 
+        core_layers.append(
+            LayerNode("Flatten", keras.layers.Flatten(), layer_name="flatten")
+        )
+
+        core_layers.append(
+            LayerNode("Dropout", keras.layers.Dropout(0.5), layer_name="dropout")
+        )
+
         activation_layers = TitleNode("Activation Layers")
 
         activation_layers.append(
@@ -119,9 +127,6 @@ class LayersTreeModel(AbstractTreeModel):
         )
 
         normalization_layers = TitleNode("Normalization Layers")
-        normalization_layers.append(
-            LayerNode("Dropout", keras.layers.Dropout(0.5), layer_name="dropout")
-        )
         normalization_layers.append(
             LayerNode(
                 "BatchNormalization",

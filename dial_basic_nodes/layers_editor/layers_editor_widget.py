@@ -59,13 +59,20 @@ class LayersEditorWidget(QWidget):
         # Setup connections
         self._model_table.layers_modified.connect(lambda: self.layers_modified.emit())
 
-    def get_model(self):
+    def set_input_model(self, model):
+        model.summary()
+
+        self._model_table.set_layers(model.layers)
+
+    def get_output_model(self):
         model = Sequential()
 
         for layer in self._model_table.layers:
             model.add(layer)
 
-        return deepcopy(model)
+        model.summary()
+
+        return model
 
     def sizeHint(self) -> "QSize":
         return QSize(600, 300)

@@ -53,9 +53,12 @@ class PredefinedModelsWidget(QWidget):
         )
 
     def get_model(self) -> Optional["Model"]:
-        return self._predefined_models_window.get_selected_model()["loader"](
-            include_top=self.__include_top.isChecked()
-        )
+        try:
+            return self._predefined_models_window.get_selected_model()["loader"](
+                include_top=self._include_top.isChecked()
+            )
+        except TypeError:
+            return None
 
     def _update_description_labels(self, model_desc: dict):
         self._model_name.setText(model_desc["name"])

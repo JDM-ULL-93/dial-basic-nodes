@@ -25,7 +25,9 @@ class ModelTableWidget(QWidget):
 
         self.__main_layout = QVBoxLayout()
 
-        self.__setup_ui()
+        self.__main_layout.addWidget(self.__view)
+
+        self.setLayout(self.__main_layout)
 
         self.__model.layers_modified.connect(
             lambda layers: self.layers_modified.emit(layers)
@@ -35,10 +37,8 @@ class ModelTableWidget(QWidget):
     def layers(self):
         return self.__model.layers
 
-    def __setup_ui(self):
-        self.__main_layout.addWidget(self.__view)
-
-        self.setLayout(self.__main_layout)
+    def set_layers(self, layers):
+        self.__model.load_layers(layers)
 
     def __getstate__(self):
         return {"layers": self.__model.layers}

@@ -16,13 +16,13 @@ class LayersEditorNode(Node):
     def __init__(self, layers_editor_widget: "LayersEditorWidget"):
         super().__init__(title="Layers Editor Node", inner_widget=layers_editor_widget)
 
+        self.add_input_port(name="Model", port_type=Model)
+        self.inputs["Model"].set_processor_function(self.inner_widget.set_input_model)
+
         self.add_output_port(name="Model", port_type=Model)
-        self.outputs["Model"].set_generator_function(self.inner_widget.get_model)
+        self.outputs["Model"].set_generator_function(self.inner_widget.get_output_model)
 
         self.inner_widget.layers_modified.connect(lambda: self.outputs["Model"].send())
-
-    def get_model(self):
-        return self.inner_widget.get_model()
 
     def __reduce__(self):
         return (LayersEditorNode, (self.inner_widget,), super().__getstate__())
