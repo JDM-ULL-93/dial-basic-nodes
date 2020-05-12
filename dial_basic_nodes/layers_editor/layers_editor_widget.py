@@ -60,8 +60,6 @@ class LayersEditorWidget(QWidget):
         self._model_table.layers_modified.connect(lambda: self.layers_modified.emit())
 
     def set_input_model(self, model):
-        model.summary()
-
         self._model_table.set_layers(model.layers)
 
     def get_output_model(self):
@@ -69,8 +67,6 @@ class LayersEditorWidget(QWidget):
 
         for layer in self._model_table.layers:
             model.add(layer)
-
-        model.summary()
 
         return model
 
