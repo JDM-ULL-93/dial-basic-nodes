@@ -30,7 +30,7 @@ class DatasetTableItemDelegate(QStyledItemDelegate):
         data_type = index.data(DatasetTableModel.TypeRole)
 
         try:
-            if isinstance(data_type, datatype.ImageArray):
+            if isinstance(data_type, (datatype.ImageArray, datatype.ImagePath)):
                 self.__paint_image_array(raw_data, painter, option, index)
             else:
                 self.__paint_string(raw_data, data_type, painter, option, index)
