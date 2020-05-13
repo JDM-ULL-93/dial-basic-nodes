@@ -23,9 +23,7 @@ class TrainingConsoleNode(Node):
 
         self.add_output_port("Trained Model", port_type=Model)
 
-        self.inputs["TTV Sets"].set_processor_function(
-            self.inner_widget.set_ttv
-        )
+        self.inputs["TTV Sets"].set_processor_function(self.inner_widget.set_ttv)
         self.inputs["Model"].set_processor_function(
             self.inner_widget.set_pretrained_model
         )

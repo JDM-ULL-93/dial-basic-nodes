@@ -5,7 +5,8 @@ from typing import Optional
 
 import dependency_injector.providers as providers
 from dial_core.datasets import TTVSets
-from dial_core.datasets.io import DatasetIORegistry, TTVSetsIO
+from dial_core.datasets.io import TTVSetsIO
+from dial_core.datasets.io.dataset_io import DatasetIORegistry
 from dial_core.utils import log
 from PySide2.QtWidgets import (
     QComboBox,

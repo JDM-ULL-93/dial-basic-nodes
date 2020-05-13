@@ -6,6 +6,8 @@ from typing import Dict, Optional
 
 import dependency_injector.providers as providers
 import tensorflow as tf
+from dial_core.datasets import TTVSets
+from dial_core.utils import log
 from PySide2.QtCore import QObject, QSize, Qt, QThread, Signal
 from PySide2.QtWidgets import (
     QGroupBox,
@@ -21,9 +23,6 @@ from tensorboard import program
 from tensorflow import keras
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
-
-from dial_core.datasets import TTVSets
-from dial_core.utils import log
 
 LOGGER = log.get_logger(__name__)
 
@@ -197,10 +196,13 @@ class TrainingConsoleWidget(QWidget):
 
         # Create a new model based on the pretrained one, but with a new InputLayer
         # compatible with the dataset
-        input_layer = Input(self._ttv.train.input_shape)
-        output = self._pretrained_model(input_layer)
+        if self._pretrained_model.layers[0].__class__.__name__ != "InputLayer":
+            input_layer = Input(self._ttv.train.input_shape)
 
-        self._trained_model = Model(input_layer, output)
+            output = self._pretrained_model(input_layer)
+            self._trained_model = Model(input_layer, output)
+        else:
+            self._trained_model = self._pretrained_model
 
         try:
             self._trained_model.compile(

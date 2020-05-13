@@ -8,7 +8,7 @@ from dial_core.utils import log
 from PySide2.QtCore import QSize
 from PySide2.QtWidgets import QFormLayout, QGridLayout, QLabel, QSplitter, QWidget
 
-from .ttv_sets_tabs import TTVSetsTabsFactory, TTVSetsTabs
+from .ttv_sets_tabs import TTVSetsTabs, TTVSetsTabsFactory
 
 LOGGER = log.get_logger(__name__)
 
@@ -39,6 +39,8 @@ class TTVSetsEditorWidget(QWidget):
         self._train_len_label = QLabel("0")
         self._test_len_label = QLabel("0")
         self._validation_len_label = QLabel("0")
+
+        self._train_shape_label = QLabel("()")
 
         # Configure interface
         self._setup_ui()
@@ -78,6 +80,13 @@ class TTVSetsEditorWidget(QWidget):
         self._test_len_label.setText(str(test_len))
         self._validation_len_label.setText(str(validation_len))
 
+        print(">>> Update shape")
+        self._train_shape_label.setText(
+            f"X: {self._ttv.train.input_shape}. Y: {self._ttv.train.output_shape}"
+            if self._ttv.train
+            else "N/A"
+        )
+
     def _setup_ui(self):
         """Widget layout configuration."""
         splitter = QSplitter()
@@ -90,6 +99,7 @@ class TTVSetsEditorWidget(QWidget):
         self._ttv_info_layout.addRow(
             "Total items (validation)", self._validation_len_label
         )
+        self._ttv_info_layout.addRow("Shape (train): ", self._train_shape_label)
 
         ttv_info_widget = QWidget()
         ttv_info_widget.setLayout(self._ttv_info_layout)
