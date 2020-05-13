@@ -43,6 +43,7 @@ class HyperparametersConfigWidget(QWidget):
         self.__batch_size_spinbox = QSpinBox(parent=self)
         self.__batch_size_spinbox.setValue(32)
         self.__batch_size_spinbox.setMinimum(1)
+        self.__batch_size_spinbox.setMaximum(999999)
 
         # Layouts
         self.__main_layout = QFormLayout()

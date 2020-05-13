@@ -68,7 +68,7 @@ class OperationGroup(QGroupBox):
 
 class ResizeOperation(OperationGroup):
     def __init__(self, parent: "QWidget" = None):
-        super().__init__("Change Image Output Size")
+        super().__init__("Target Size")
 
         self._target_size_textbox = QLineEdit()
 

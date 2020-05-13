@@ -19,7 +19,6 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from tensorboard import program
 from tensorflow import keras
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
@@ -256,14 +255,17 @@ class TrainingConsoleWidget(QWidget):
             # Update progress
             self._batch_progress_bar.setValue(batch)
 
-            # Log metrics on console
-            message = f'{logs["batch"]}/{total_train_batches}'
+            try:
+                # Log metrics on console
+                message = f"{batch}/{total_train_batches}"
 
-            for (k, v) in list(logs.items())[2:]:
-                message += f" - {k}: {v:.4f}"
+                for (k, v) in list(logs.items())[2:]:
+                    message += f" - {k}: {v:.4f}"
 
-            LOGGER.info(message)
-            self.training_output_textbox.appendPlainText(message)
+                LOGGER.info(message)
+                self.training_output_textbox.appendPlainText(message)
+            except Exception as err:
+                LOGGER.exception(err)
 
         def train_end_update(logs):
             # Put the progress bar at 100% when the training ends
@@ -281,22 +283,22 @@ class TrainingConsoleWidget(QWidget):
 
         self.training_stopped.connect(signals_callback.stop_model)
 
-        log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+        # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
 
-        tb = program.TensorBoard()
-        tb.configure(argv=[None, "--logdir", log_dir])
-        url = tb.launch()
-        print("Launched Tensorboard instance in:", url)
+        # tb = program.TensorBoard()
+        # tb.configure(argv=[None, "--logdir", log_dir])
+        # url = tb.launch()
+        # print("Launched Tensorboard instance in:", url)
 
-        tf_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        tf_callback.set_model(self._trained_model)
+        # tf_callback=tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+        # tf_callback.set_model(self._trained_model)
 
         # Start training
         self._fit_worker = FitWorker(
             self._trained_model,
             self._ttv.train,
             self._hyperparameters,
-            callbacks=[signals_callback, tf_callback],
+            callbacks=[signals_callback],
         )
 
         self.training_status = self.TrainingStatus.Running
