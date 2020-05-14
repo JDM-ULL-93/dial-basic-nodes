@@ -1,11 +1,9 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
-import datetime
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import dependency_injector.providers as providers
-import tensorflow as tf
 from dial_core.datasets import TTVSets
 from dial_core.utils import log
 from PySide2.QtCore import QObject, QSize, Qt, QThread, Signal
@@ -20,6 +18,7 @@ from PySide2.QtWidgets import (
     QWidget,
 )
 from tensorflow import keras
+from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 
@@ -95,6 +94,7 @@ class TrainingConsoleWidget(QWidget):
         self._pretrained_model: Optional["keras.models.Model"] = None
         self._ttv: Optional["TTVSets"] = None
         self._hyperparameters: Optional[Dict] = None
+        self._callbacks: List[Callback] = []
 
         self._trained_model: Optional["keras.models.Model"] = None
 
@@ -180,6 +180,9 @@ class TrainingConsoleWidget(QWidget):
         self._hyperparameters = hyperparameters
 
         self.training_status = self.TrainingStatus.Not_Compiled
+
+    def set_callbacks(self, callbacks: List[Callback]):
+        self._callbacks = callbacks
 
     def get_trained_model(self):
         """Returns the model after it has been trained."""
@@ -283,6 +286,7 @@ class TrainingConsoleWidget(QWidget):
 
         self.training_stopped.connect(signals_callback.stop_model)
 
+        print(self._callbacks)
         # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
 
         # tb = program.TensorBoard()
@@ -298,7 +302,7 @@ class TrainingConsoleWidget(QWidget):
             self._trained_model,
             self._ttv.train,
             self._hyperparameters,
-            callbacks=[signals_callback],
+            callbacks=[signals_callback] + self._callbacks,
         )
 
         self.training_status = self.TrainingStatus.Running
