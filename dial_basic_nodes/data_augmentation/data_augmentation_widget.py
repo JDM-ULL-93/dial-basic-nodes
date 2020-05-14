@@ -165,6 +165,7 @@ class DataAugmentationWidget(QWidget):
 
         # Components
         self._ttv: Optional["TTVSets"] = None
+        self._previous_operations: List[Callable] = []
 
         # Initialize widgets
         self._operations_column = OperationsColumn()
@@ -188,6 +189,11 @@ class DataAugmentationWidget(QWidget):
             LOGGER.debug("Updating widget values with %s", self)
             self._operations_column.fill_values_from_dataset(dataset)
             break
+
+        self.update_operations()
+
+    def set_previous_operations(self, operations: List[Callable]):
+        self._previous_operations = operations
 
         self.update_operations()
 
@@ -229,7 +235,9 @@ class DataAugmentationWidget(QWidget):
 
         for dataset in (self._ttv.train, self._ttv.test, self._ttv.validation):
             if dataset:
-                dataset.x_type.transformations = [grouped_augmentation_operation]
+                dataset.x_type.transformations = [
+                    grouped_augmentation_operation
+                ] + self._previous_operations
 
         LOGGER.debug(self._ttv.train.x_type.transformations)
 

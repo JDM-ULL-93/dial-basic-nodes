@@ -14,8 +14,16 @@ if TYPE_CHECKING:
 LOGGER = log.get_logger(__name__)
 
 PREDEFINED_MODELS_LIST = [
-    {"name": "VGG16", "loader": vgg16.VGG16},
-    {"name": "VGG19", "loader": vgg19.VGG19},
+    {
+        "name": "VGG16",
+        "loader": vgg16.VGG16,
+        "transformations": [vgg16.preprocess_input],
+    },
+    {
+        "name": "VGG19",
+        "loader": vgg19.VGG19,
+        "transformations": [vgg19.preprocess_input],
+    },
 ]
 
 

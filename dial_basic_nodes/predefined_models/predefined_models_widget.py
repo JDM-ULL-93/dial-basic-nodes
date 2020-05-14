@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
 import re
-from typing import Optional
+from typing import Callable, List, Optional
 
 import dependency_injector.providers as providers
 from dial_core.utils import log
@@ -120,6 +120,18 @@ class PredefinedModelsWidget(QWidget):
             )
 
         except TypeError as err:
+            LOGGER.exception(err)
+            return None
+
+    def get_image_transformations(self) -> List[Callable]:
+        try:
+            transformations = self._predefined_models_window.get_selected_model()[
+                "transformations"
+            ]
+
+            return transformations
+
+        except KeyError as err:
             LOGGER.exception(err)
             return None
 
