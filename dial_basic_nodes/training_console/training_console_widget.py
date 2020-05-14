@@ -258,17 +258,14 @@ class TrainingConsoleWidget(QWidget):
             # Update progress
             self._batch_progress_bar.setValue(batch)
 
-            try:
-                # Log metrics on console
-                message = f"{batch}/{total_train_batches}"
+            # Log metrics on console
+            message = f"{batch}/{total_train_batches}"
 
-                for (k, v) in list(logs.items())[2:]:
-                    message += f" - {k}: {v:.4f}"
+            for (k, v) in list(logs.items()):
+                message += f" - {k}: {v:.4f}"
 
-                LOGGER.info(message)
-                self.training_output_textbox.appendPlainText(message)
-            except Exception as err:
-                LOGGER.exception(err)
+            LOGGER.info(message)
+            self.training_output_textbox.appendPlainText(message)
 
         def train_end_update(logs):
             # Put the progress bar at 100% when the training ends

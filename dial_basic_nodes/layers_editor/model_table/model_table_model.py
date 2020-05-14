@@ -40,7 +40,10 @@ class ModelTableModel(QAbstractTableModel):
         Shape = 2
         Units = 3
         Trainable = 4
-        Activation = 4
+        Activation = 5
+        Filters = 6
+        KernelSize = 7
+        PoolSize = 8
 
     def __init__(self, parent: "QObject" = None):
         super().__init__(parent)
@@ -105,6 +108,9 @@ class ModelTableModel(QAbstractTableModel):
             return general_flags | Qt.ItemIsUserCheckable
 
         if index.column() == self.Column.Activation:
+            return general_flags | Qt.ItemIsEditable
+
+        if index.column() == self.Column.Filters:
             return general_flags | Qt.ItemIsEditable
 
         return general_flags
@@ -187,6 +193,11 @@ class ModelTableModel(QAbstractTableModel):
             if index.column() == self.Column.Activation:
                 layer.activation = str(value)
                 self.layers_modified.emit(self.__layers)
+
+            if index.column() == self.Column.Filters:
+                layer.filters = int(value)
+                self.layers_modified.emit(self.__layers)
+
 
         LOGGER.debug("New layer config: %s", layer.get_config())
 
@@ -390,6 +401,9 @@ class ModelTableModel(QAbstractTableModel):
 
             if index.column() == self.Column.Shape:
                 return str(layer.output_shape)
+
+            if index.column() == self.Column.Filters:
+                return str(layer.filters)
 
         except AttributeError:
             pass
