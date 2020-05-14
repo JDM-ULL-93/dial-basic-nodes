@@ -19,6 +19,11 @@ from .hyperparameters_config import (
     HyperparametersConfigNodeCells,
     HyperparametersConfigNodeFactory,
 )
+from .model_checkpoint import (
+    ModelCheckpointNode,
+    ModelCheckpointNodeCells,
+    ModelCheckpointNodeFactory,
+)
 from .layers_editor import (
     LayersEditorNode,
     LayersEditorNodeCells,
@@ -89,6 +94,7 @@ def load_plugin():
     )
     node_registry.register_node("Training/Training Console", TrainingConsoleNodeFactory)
     node_registry.register_node("Training/Test Model", TestModelNodeFactory)
+    node_registry.register_node("Training/ModelCheckpoint Callback", ModelCheckpointNodeFactory)
 
     # Register Notebook Transformers
     node_cells_registry = NodeCellsRegistrySingleton()
@@ -110,6 +116,7 @@ def load_plugin():
         HyperparametersConfigNode, HyperparametersConfigNodeCells
     )
     node_cells_registry.register_transformer(TestModelNode, TestModelNodeCells)
+    node_cells_registry.register_transformer(ModelCheckpointNode, ModelCheckpointNodeCells)
     node_cells_registry.register_transformer(LayersEditorNode, LayersEditorNodeCells)
     node_cells_registry.register_transformer(
         TrainingConsoleNode, TrainingConsoleNodeCells
@@ -138,6 +145,7 @@ def unload_plugin():
     node_registry.unregister_node("Training/Hyperparameters Config")
     node_registry.unregister_node("Training/Training Console")
     node_registry.unregister_node("Training/Test Model")
+    node_registry.unregister_node("Training/ModelCheckpoint Callback", ModelCheckpointNodeFactory)
 
     # Unregister Notebook Transformers
     node_cells_registry = NodeCellsRegistrySingleton()
@@ -153,6 +161,7 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(PredefinedModelsNodeCells)
     node_cells_registry.unregister_transformer(TrainingConsoleNodeCells)
     node_cells_registry.unregister_transformer(TestModelNodeCells)
+    node_registry.unregister_node(ModelCheckpointNodeCells)
 
 
 __all__ = [
@@ -176,4 +185,6 @@ __all__ = [
     "HyperparametersConfigNodeFactory",
     "TestModelNode",
     "TestModelNodeFactory",
+    "ModelCheckpointNode",
+    "ModelCheckpointNodeFactory",
 ]
