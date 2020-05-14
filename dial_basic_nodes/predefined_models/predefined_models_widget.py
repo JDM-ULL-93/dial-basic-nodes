@@ -50,6 +50,7 @@ class PredefinedModelsWidget(QWidget):
         self._classes_intbox = QSpinBox()
         self._classes_intbox.setMinimum(2)
         self._classes_intbox.setMaximum(999999)
+        self._classes_intbox.setValue(1000)
 
         self._weights_combobox = QComboBox()
         self._weights_combobox.addItem("Imagenet", "imagenet")

@@ -37,8 +37,9 @@ class ModelTableModel(QAbstractTableModel):
     class Column(IntEnum):
         Type = 0
         Name = 1
-        Units = 2
-        Trainable = 3
+        Shape = 2
+        Units = 3
+        Trainable = 4
         Activation = 4
 
     def __init__(self, parent: "QObject" = None):
@@ -102,6 +103,9 @@ class ModelTableModel(QAbstractTableModel):
 
         if index.column() == self.Column.Trainable:
             return general_flags | Qt.ItemIsUserCheckable
+
+        if index.column() == self.Column.Activation:
+            return general_flags | Qt.ItemIsEditable
 
         return general_flags
 
@@ -180,7 +184,11 @@ class ModelTableModel(QAbstractTableModel):
                 layer.units = int(value)
                 self.layers_modified.emit(self.__layers)
 
-        LOGGER.info("New layer config: %s", layer.get_config())
+            if index.column() == self.Column.Activation:
+                layer.activation = str(value)
+                self.layers_modified.emit(self.__layers)
+
+        LOGGER.debug("New layer config: %s", layer.get_config())
 
         return True
 
@@ -379,6 +387,9 @@ class ModelTableModel(QAbstractTableModel):
 
             if index.column() == self.Column.Activation:
                 return str(layer.activation.__name__)
+
+            if index.column() == self.Column.Shape:
+                return str(layer.output_shape)
 
         except AttributeError:
             pass
