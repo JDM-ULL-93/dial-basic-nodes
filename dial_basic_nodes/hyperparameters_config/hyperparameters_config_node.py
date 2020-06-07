@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 import dependency_injector.providers as providers
 from dial_core.node_editor import Node
 
-from .hyperparameters_config_widget import HyperparametersConfigWidgetFactory
+from .hyperparameters_config_widget_gui import HyperparametersConfigWidgetGuiFactory
 
 if TYPE_CHECKING:
-    from .hyperparameters_config_widget import HyperparametersConfigWidget
+    from .hyperparameters_config_widget_gui import HyperparametersConfigWidgetGui
 
 
 class HyperparametersConfigNode(Node):
     def __init__(
-        self, hyperparameters_config_widget: "HyperparametersConfigWidget",
+        self, hyperparameters_config_widget: "HyperparametersConfigWidgetGui",
     ):
         super().__init__(
             title="Hyperparameters Config", inner_widget=hyperparameters_config_widget,
@@ -29,7 +29,7 @@ class HyperparametersConfigNode(Node):
         return (HyperparametersConfigNode, (self.inner_widget,), super().__getstate__())
 
 
-HyperparametersConfigNodeFactory = providers.Factory(
+HyperparametersConfigNodeGuiFactory = providers.Factory(
     HyperparametersConfigNode,
-    hyperparameters_config_widget=HyperparametersConfigWidgetFactory,
+    hyperparameters_config_widget=HyperparametersConfigWidgetGuiFactory,
 )
