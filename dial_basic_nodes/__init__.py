@@ -17,6 +17,7 @@ from .data_augmentation import (
 from .hyperparameters_config import (
     HyperparametersConfigNode,
     HyperparametersConfigNodeCells,
+    HyperparametersConfigNodeFactory,
     HyperparametersConfigNodeGuiFactory,
 )
 from .model_checkpoint import (
@@ -170,6 +171,8 @@ def unload_plugin():
     node_registry.unregister_node(ModelCheckpointNodeCells)
 
 
+load_plugin()
+
 __all__ = [
     "load_plugin",
     "unload_plugin",
@@ -188,6 +191,8 @@ __all__ = [
     "TrainingConsoleNode",
     "TrainingConsoleNodeFactory",
     "HyperparametersConfigNode",
+    "HyperparametersConfigNodeCells",
+    "HyperparametersConfigNodeFactory",
     "HyperparametersConfigNodeGuiFactory",
     "TestModelNode",
     "TestModelNodeFactory",

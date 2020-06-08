@@ -1,7 +1,10 @@
 # vim: ft=python fileencoding=utf-8 sts=4 sw=4 et:
 
+import dependency_injector.providers as providers
+
 from enum import Enum
 from typing import Dict, Any, List
+
 
 class HyperparametersConfigWidget:
     class Parameters(Enum):
@@ -12,32 +15,40 @@ class HyperparametersConfigWidget:
 
     def __init__(self):
 
-        self._available_optimizers= ["SGD", "RMSprop", "Adagrad", "Adadelta", "Adam", "Adamax", "Nadam"]
+        self._available_optimizers = [
+            "SGD",
+            "RMSprop",
+            "Adagrad",
+            "Adadelta",
+            "Adam",
+            "Adamax",
+            "Nadam",
+        ]
 
         self._available_loss_functions = [
-                "mean_squared_error",
-                "mean_absolute_error",
-                "mean_absolute_percentage_error",
-                "mean_square_logarithmic_error",
-                "squared_hinge",
-                "hinge",
-                "categorical_hinge",
-                "logcosh",
-                "huber_loss",
-                "categorical_crossentropy",
-                "sparse_categorical_crossentropy",
-                "binary_crossentropy",
-                "kullback_leibler_divergence",
-                "poisson",
-                "cosine_proximity",
-                "is_categorical_crossentropy",
-            ]
+            "mean_squared_error",
+            "mean_absolute_error",
+            "mean_absolute_percentage_error",
+            "mean_square_logarithmic_error",
+            "squared_hinge",
+            "hinge",
+            "categorical_hinge",
+            "logcosh",
+            "huber_loss",
+            "categorical_crossentropy",
+            "sparse_categorical_crossentropy",
+            "binary_crossentropy",
+            "kullback_leibler_divergence",
+            "poisson",
+            "cosine_proximity",
+            "is_categorical_crossentropy",
+        ]
 
         self._hyperparameters = {
             self.Parameters.Epochs.value: 1,
             self.Parameters.LossFunction.value: self._available_loss_functions[0],
             self.Parameters.Optimizer.value: self._available_optimizers[0],
-            self.Parameters.BatchSize.value: 32
+            self.Parameters.BatchSize.value: 32,
         }
 
     def get_hyperparameters(self):
@@ -46,7 +57,7 @@ class HyperparametersConfigWidget:
     def set_hyperparameters(self, hyperparameters: Dict[str, Any]):
         self.set_epochs(hyperparameters[self.Parameters.Epochs.value])
         self.set_loss_function(hyperparameters[self.Parameters.LossFunction.value])
-        self.set_optimizer(hyperparameters[śelf.Parameters.Optimizer.value])
+        self.set_optimizer(hyperparameters[self.Parameters.Optimizer.value])
         self.set_batch_size(hyperparameters[self.Parameters.batch_size.value])
 
     def get_epochs(self) -> int:
@@ -60,7 +71,7 @@ class HyperparametersConfigWidget:
 
     def set_loss_function(self, loss_function: str):
         if loss_function not in self._available_loss_functions:
-            raise ValueError("`%s` is an invalid loss function!", loss_function)
+            raise ValueError(f"`{loss_function}` is an invalid loss function!")
 
         self._hyperparameters[self.Parameters.LossFunction.value] = loss_function
 
@@ -72,7 +83,7 @@ class HyperparametersConfigWidget:
 
     def set_optimizer(self, optimizer: str):
         if optimizer not in self._available_optimizers:
-            raise ValueError("`%s` is an invalid loss function!", loss_function)
+            raise ValueError(f"`{optimizer}` is an invalid optimizer!")
 
         self._hyperparameters[self.Parameters.Optimizer.value] = optimizer
 
@@ -84,3 +95,6 @@ class HyperparametersConfigWidget:
 
     def set_batch_size(self, batch_size: int):
         self._hyperparameters[self.Parameters.BatchSize.value] = batch_size
+
+
+HyperparametersConfigWidgetFactory = providers.Factory(HyperparametersConfigWidget)

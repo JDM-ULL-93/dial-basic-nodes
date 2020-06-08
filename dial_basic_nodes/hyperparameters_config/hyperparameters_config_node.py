@@ -7,6 +7,8 @@ from dial_core.node_editor import Node
 
 from .hyperparameters_config_widget_gui import HyperparametersConfigWidgetGuiFactory
 
+from .hyperparameters_config_widget import HyperparametersConfigWidgetFactory
+
 if TYPE_CHECKING:
     from .hyperparameters_config_widget_gui import HyperparametersConfigWidgetGui
 
@@ -32,4 +34,9 @@ class HyperparametersConfigNode(Node):
 HyperparametersConfigNodeGuiFactory = providers.Factory(
     HyperparametersConfigNode,
     hyperparameters_config_widget=HyperparametersConfigWidgetGuiFactory,
+)
+
+HyperparametersConfigNodeFactory = providers.Factory(
+    HyperparametersConfigNode,
+    hyperparameters_config_widget=HyperparametersConfigWidgetFactory,
 )

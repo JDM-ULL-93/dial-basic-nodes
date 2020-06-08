@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QComboBox, QFormLayout, QSpinBox, QWidget
 
 from .hyperparameters_config_widget import HyperparametersConfigWidget
 
+
 class HyperparametersConfigWidgetGui(QWidget, HyperparametersConfigWidget):
     def __init__(self, parent: "QWidget" = None):
         HyperparametersConfigWidget.__init__(self)
