@@ -36,6 +36,7 @@ setup(
     package_dir={"": "."},
     package_data={},
     install_requires=['dial-core'],
-    dependency_links=['/home/davafons/dial-core'],
+    #dependency_links=['/home/davafons/dial-core'],
+    dependency_links=["C:/Users/DuquePC/source/repos/Practicas-TFG/dial-core"],
     extras_require={"dev": ["black==19.*,>=19.10.0.b0", "docstr-coverage==1.*,>=1.0.5", "flake8==3.*,>=3.7.9", "isort==4.*,>=4.3.21", "mypy==0.*,>=0.770.0", "pre-commit==2.*,>=2.1.1", "pylint==2.*,>=2.4.4", "pytest==5.*,>=5.4.1", "pytest-cov==2.*,>=2.8.1", "pytest-qt==3.*,>=3.3.0", "sphinx==2.*,>=2.4.4", "sphinx-autodoc-typehints==1.*,>=1.10.3", "sphinx-rtd-theme==0.*,>=0.4.3", "taskipy==1.*,>=1.2.0", "tox==3.*,>=3.14.5"]},
 )

@@ -173,7 +173,6 @@ class ModelTableModel(QAbstractTableModel):
         """
         if not index.isValid():
             return False
-
         layer = index.internalPointer()
 
         if role == Qt.CheckStateRole:
@@ -304,7 +303,6 @@ class ModelTableModel(QAbstractTableModel):
         LOGGER.debug("Previous model size: %s", self.rowCount())
 
         self.beginInsertRows(QModelIndex(), row, row + count - 1)
-
         new_layers: List = parent.internalPointer()
 
         # A suffix is added to each layer to make the names unique.

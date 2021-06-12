@@ -15,8 +15,8 @@ keywords = ["deep-learning", "dial-app"]
 
 [tool.poetry.dependencies]
 python = ">=3.6.0,<=3.8.3"
+dial-core = { git="https://github.com/JDM-ULL-93/dial-core" }
 
-dial-core = { path="/home/davafons/dial-core" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.1"

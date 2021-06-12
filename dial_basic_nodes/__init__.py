@@ -72,6 +72,11 @@ from .ttv_splitter import (
     TTVSetsSplitterNodeFactory,
 )
 
+from .model_loader import (
+    ModelLoaderNode,
+    ModelLoaderNodeFactory
+)
+
 
 def load_plugin():
     node_registry = NodeRegistrySingleton()
@@ -90,6 +95,7 @@ def load_plugin():
     )
     node_registry.register_node("Models/Layers Editor", LayersEditorNodeFactory)
     node_registry.register_node("Models/Predefined Models", PredefinedModelsNodeFactory)
+    node_registry.register_node("Models/Model Loader", ModelLoaderNodeFactory)
     node_registry.register_node(
         "Training/Hyperparameters Config", HyperparametersConfigNodeGuiFactory
     )
@@ -147,12 +153,14 @@ def unload_plugin():
     node_registry.unregister_node("Datasets/Predefined TTVs")
     node_registry.unregister_node("Models/Layers Editor")
     node_registry.unregister_node("Models/Predefined Models")
+    node_registry.unregister_node("Models/Model Loader")
     node_registry.unregister_node("Training/Hyperparameters Config")
     node_registry.unregister_node("Training/Training Console")
     node_registry.unregister_node("Training/Test Model")
     node_registry.unregister_node(
         "Training/ModelCheckpoint Callback", ModelCheckpointNodeFactory
     )
+    node_registry.unregister_node("Debugging/Dummy")
 
     # Unregister Notebook Transformers
     node_cells_registry = NodeCellsRegistrySingleton()
@@ -169,9 +177,10 @@ def unload_plugin():
     node_cells_registry.unregister_transformer(TrainingConsoleNodeCells)
     node_cells_registry.unregister_transformer(TestModelNodeCells)
     node_registry.unregister_node(ModelCheckpointNodeCells)
+    #node_registry.unregister_node(DummyNodeCells)
 
 
-load_plugin()
+#load_plugin()
 
 __all__ = [
     "load_plugin",
