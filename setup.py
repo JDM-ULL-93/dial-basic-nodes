@@ -27,7 +27,7 @@ setup(
     version='0.8a0',
     description='Basic nodes for the Dial app.',
     python_requires='<=3.8.3,>=3.6.0',
-    project_urls={"homepage": "https://github.com/dial-app/dial-basic-nodes", "repository": "https://github.com/dial-app/dial-basic-nodes"},
+    project_urls={"homepage": "https://github.com/JDM-ULL-93/dial-basic-nodes", "repository": "https://github.com/JDM-ULL-93/dial-basic-nodes"},
     author='David Afonso',
     author_email='davafons@gmail.com',
     license='GPL-3.0-only',
@@ -35,8 +35,14 @@ setup(
     packages=['dial_basic_nodes', 'dial_basic_nodes.data_augmentation', 'dial_basic_nodes.hyperparameters_config', 'dial_basic_nodes.layers_editor', 'dial_basic_nodes.layers_editor.layers_tree', 'dial_basic_nodes.layers_editor.layers_tree.abstract_tree_model', 'dial_basic_nodes.layers_editor.model_table', 'dial_basic_nodes.model_checkpoint', 'dial_basic_nodes.predefined_models', 'dial_basic_nodes.predefined_models.predefined_models_window', 'dial_basic_nodes.predefined_ttv', 'dial_basic_nodes.predefined_ttv.ttv_sets_list', 'dial_basic_nodes.test_model', 'dial_basic_nodes.test_model.test_dataset_table', 'dial_basic_nodes.training_console', 'dial_basic_nodes.ttv_editor', 'dial_basic_nodes.ttv_editor.ttv_sets_tabs', 'dial_basic_nodes.ttv_exporter', 'dial_basic_nodes.ttv_importer', 'dial_basic_nodes.ttv_importer.datatype_selector', 'dial_basic_nodes.ttv_importer.formats_widgets', 'dial_basic_nodes.ttv_merger', 'dial_basic_nodes.ttv_splitter', 'dial_basic_nodes.utils', 'dial_basic_nodes.utils.dataset_table'],
     package_dir={"": "."},
     package_data={},
-    install_requires=['dial-core'],
+    install_requires=[
+        'dial-core',
+        'dial-gui',
+        "PySide2==5.*,>=5.12.6",
+        "tensorflow==2.*,>=2.4.0",
+        "Pillow==7.*,>=7.2.0"
+    ],
     #dependency_links=['/home/davafons/dial-core'],
-    dependency_links=["C:/Users/DuquePC/source/repos/Practicas-TFG/dial-core"],
+    dependency_links=["../dial-core","../dial-gui"],
     extras_require={"dev": ["black==19.*,>=19.10.0.b0", "docstr-coverage==1.*,>=1.0.5", "flake8==3.*,>=3.7.9", "isort==4.*,>=4.3.21", "mypy==0.*,>=0.770.0", "pre-commit==2.*,>=2.1.1", "pylint==2.*,>=2.4.4", "pytest==5.*,>=5.4.1", "pytest-cov==2.*,>=2.8.1", "pytest-qt==3.*,>=3.3.0", "sphinx==2.*,>=2.4.4", "sphinx-autodoc-typehints==1.*,>=1.10.3", "sphinx-rtd-theme==0.*,>=0.4.3", "taskipy==1.*,>=1.2.0", "tox==3.*,>=3.14.5"]},
 )

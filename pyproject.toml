@@ -2,20 +2,21 @@
 name = "dial-basic-nodes"
 version = "0.8a0"
 description = "Basic nodes for the Dial app."
-authors = ["David Afonso <davafons@gmail.com>"]
+authors = ["David Afonso <davafons@gmail.com>","Javier Duque Melguizo <javierduquemelguizo@gmail.com>"]
 
 license = "GPL-3.0-only"
 
 readme = "README.md"
 
-repository = "https://github.com/dial-app/dial-basic-nodes"
-homepage = "https://github.com/dial-app/dial-basic-nodes"
+repository = "https://github.com/JDM-ULL-93/dial-basic-nodes"
+homepage = "https://github.com/JDM-ULL-93/dial-basic-nodes"
 
 keywords = ["deep-learning", "dial-app"]
 
 [tool.poetry.dependencies]
 python = ">=3.6.0,<=3.8.3"
-dial-core = { git="https://github.com/JDM-ULL-93/dial-core" }
+#dial-core = { git="https://github.com/JDM-ULL-93/dial-core" }
+#dial-gui = { git="https://github.com/JDM-ULL-93/dial-gui" }
 
 
 [tool.poetry.dev-dependencies]
